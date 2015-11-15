@@ -54,7 +54,7 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
 
 - (ZXPAutoLayoutMaker *)left {
     [self.tempConstraints removeAllObjects];
-    [self.constraintAttributes addObject:@(NSLayoutAttributeLeading)];
+    [self.constraintAttributes addObject:@(NSLayoutAttributeLeft)];
     return self;
 }
 
@@ -65,6 +65,18 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
 }
 
 - (ZXPAutoLayoutMaker *)right {
+    [self.tempConstraints removeAllObjects];
+    [self.constraintAttributes addObject:@(NSLayoutAttributeRight)];
+    return self;
+}
+
+- (ZXPAutoLayoutMaker *)leading {
+    [self.tempConstraints removeAllObjects];
+    [self.constraintAttributes addObject:@(NSLayoutAttributeLeading)];
+    return self;
+}
+
+- (ZXPAutoLayoutMaker *)trailing {
     [self.tempConstraints removeAllObjects];
     [self.constraintAttributes addObject:@(NSLayoutAttributeTrailing)];
     return self;

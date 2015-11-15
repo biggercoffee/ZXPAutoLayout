@@ -23,6 +23,8 @@
 @property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *left; /**< 左边距 */
 @property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *bottom; /**< 下边距 */
 @property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *right; /**< 右边距 */
+@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *leading;
+@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *trailing;
 
 @property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *width; /**< 宽度 */
 @property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *height; /**< 高度 */
@@ -80,10 +82,10 @@
 @interface UIView (ZXPAdditions)
 
 //view 的边距属性
-@property (nonatomic,strong,readonly) UIView *zxp_top;
-@property (nonatomic,strong,readonly) UIView *zxp_left;
-@property (nonatomic,strong,readonly) UIView *zxp_bottom;
-@property (nonatomic,strong,readonly) UIView *zxp_right;
+@property (nonatomic,strong,readonly) id zxp_top;
+@property (nonatomic,strong,readonly) id zxp_left;
+@property (nonatomic,strong,readonly) id zxp_bottom;
+@property (nonatomic,strong,readonly) id zxp_right;
 
 @property (nonatomic,assign,readonly) NSLayoutAttribute zxp_attribute;
 
