@@ -13,6 +13,8 @@
 
 #### 现在简单使用ZXPAutoLayout来布局(注:使用自动布局之前要先添加到父视图里)
 
+##### 导入ZXPAutoLayout.h文件
+
 ##### 添加一个与self.view的上下左右相等的约束
 <pre><code>
 [view zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
@@ -44,6 +46,76 @@
         layout.width.equalToWithMultiplier(self.view,0.5); //设置宽度为self.view的宽度的0.5(比例)
         layout.height.greaterThanOrEqual(@1); //自适应第二步,设置高度大于等于1即可
     }];
+</code></pre>
+
+##### 等宽并对齐
+<pre><code>
+    UIView *view1 = [UIView new];
+        view1.backgroundColor = [UIColor purpleColor];
+        [self.view addSubview:view1];
+        
+        UIView *view2 = [UIView new];
+        view2.backgroundColor = [UIColor blueColor];
+        [self.view addSubview:view2];
+        
+        UIView *view3 = [UIView new];
+        view3.backgroundColor = [UIColor yellowColor];
+        [self.view addSubview:view3];
+        
+        [view1 zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
+            layout.top.offset(200);
+            layout.left.offset(10);
+            layout.height.offset(40);
+            layout.width.equalTo(view2);
+        }];
+        
+        [view2 zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
+            layout.top.height.equalTo(view1);
+            layout.left.equalTo(view1.zxp_right).offset(10);
+            layout.width.equalTo(view3);
+        }];
+        
+        [view3 zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
+            layout.top.height.equalTo(view1);
+            layout.left.equalTo(view2.zxp_right).offset(10);
+            layout.right.offset(-10);
+            layout.width.equalTo(view1);
+        }];
+</code></pre>
+
+##### 等高并对齐
+<pre><code>
+    UIView *view1 = [UIView new];
+        view1.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.3];
+        [self.view addSubview:view1];
+        
+        UIView *view2 = [UIView new];
+        view2.backgroundColor = [[UIColor orangeColor] colorWithAlphaComponent:0.3];
+        [self.view addSubview:view2];
+        
+        UIView *view3 = [UIView new];
+        view3.backgroundColor = [[UIColor blueColor] colorWithAlphaComponent:0.3];
+        [self.view addSubview:view3];
+        
+        [view1 zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
+            layout.top.offset(10);
+            layout.left.offset(10);
+            layout.right.offset(-10);
+            layout.height.equalTo(view2);
+        }];
+        
+        [view2 zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
+            layout.top.equalTo(view1.zxp_bottom).offset(10);
+            layout.left.right.equalTo(view1);
+            layout.height.equalTo(view3);
+        }];
+        
+        [view3 zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
+            layout.top.equalTo(view2.zxp_bottom).offset(10);
+            layout.bottom.offset(-10);
+            layout.left.right.equalTo(view1);
+            layout.height.equalTo(view1);
+        }];
 </code></pre>
 
 #### 有任何问题欢迎issue我,你们的issue才是我的动力~! thanks
