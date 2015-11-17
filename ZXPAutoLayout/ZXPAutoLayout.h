@@ -81,31 +81,27 @@
 
 @interface UIView (ZXPAdditions)
 
-//view 的边距属性
+//attributes
 @property (nonatomic,strong,readonly) id zxp_top;
 @property (nonatomic,strong,readonly) id zxp_left;
 @property (nonatomic,strong,readonly) id zxp_bottom;
 @property (nonatomic,strong,readonly) id zxp_right;
+@property (nonatomic,strong,readonly) id zxp_leading;
+@property (nonatomic,strong,readonly) id zxp_trailing;
+@property (nonatomic,strong,readonly) id zxp_width;
+@property (nonatomic,strong,readonly) id zxp_height;
+@property (nonatomic,strong,readonly) id zxp_centerX;
+@property (nonatomic,strong,readonly) id zxp_centerY;
 
 @property (nonatomic,assign,readonly) NSLayoutAttribute zxp_attribute;
 
-/**
- *  @author coffee
- *
- *  添加约束
- *
- *  @param layout layout description
- */
+//add
 - (void)zxp_addConstraints:(void(^)(ZXPAutoLayoutMaker *layout))layout;
 
-/**
- *  @author coffee
- *
- *  更新约束
- *
- *  @param layout layout description
- */
+//update
 - (void)zxp_updateConstraints:(void(^)(ZXPAutoLayoutMaker *layout))layout;
+
+- (void)zxp_printConstraintsForSelf;
 
 @end
 

@@ -9,6 +9,12 @@
 #import "ZXPAutoLayout.h"
 #import <objc/runtime.h>
 
+@interface NSArray (ZXPPrivateOfAutoLayout)
+
+- (NSArray *)distinctUnionOfObjects;
+
+@end
+
 static NSString *ZXPAutoLayoutMakerAdd = @"ZXPAutoLayoutMakerAdd";
 static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
 
@@ -21,7 +27,7 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
  *
  *  temp save constraints for RelativeLayout (centerX,centerY,equal), do not save constraints for top,left,bottom,right,width,height
  */
-@property (nonatomic,strong) NSMutableArray<NSLayoutConstraint *> *tempConstraints;
+@property (nonatomic,strong) NSMutableArray<NSLayoutConstraint *> *tempRelatedConstraints;
 
 @property (nonatomic,strong) UIView *view;
 
@@ -36,7 +42,7 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
     if (self = [super init]) {
         
         self.constraintAttributes = [NSMutableArray array];
-        self.tempConstraints = [NSMutableArray array];
+        self.tempRelatedConstraints = [NSMutableArray array];
         
         self.view = view;
         self.layoutType = type;
@@ -47,55 +53,55 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
 }
 
 - (ZXPAutoLayoutMaker *)top {
-    [self.tempConstraints removeAllObjects];
+    [self.tempRelatedConstraints removeAllObjects];
     [self.constraintAttributes addObject:@(NSLayoutAttributeTop)];
     return self;
 }
 
 - (ZXPAutoLayoutMaker *)left {
-    [self.tempConstraints removeAllObjects];
+    [self.tempRelatedConstraints removeAllObjects];
     [self.constraintAttributes addObject:@(NSLayoutAttributeLeft)];
     return self;
 }
 
 - (ZXPAutoLayoutMaker *)bottom {
-    [self.tempConstraints removeAllObjects];
+    [self.tempRelatedConstraints removeAllObjects];
     [self.constraintAttributes addObject:@(NSLayoutAttributeBottom)];
     return self;
 }
 
 - (ZXPAutoLayoutMaker *)right {
-    [self.tempConstraints removeAllObjects];
+    [self.tempRelatedConstraints removeAllObjects];
     [self.constraintAttributes addObject:@(NSLayoutAttributeRight)];
     return self;
 }
 
 - (ZXPAutoLayoutMaker *)leading {
-    [self.tempConstraints removeAllObjects];
+    [self.tempRelatedConstraints removeAllObjects];
     [self.constraintAttributes addObject:@(NSLayoutAttributeLeading)];
     return self;
 }
 
 - (ZXPAutoLayoutMaker *)trailing {
-    [self.tempConstraints removeAllObjects];
+    [self.tempRelatedConstraints removeAllObjects];
     [self.constraintAttributes addObject:@(NSLayoutAttributeTrailing)];
     return self;
 }
 
 - (ZXPAutoLayoutMaker *)width {
-    [self.tempConstraints removeAllObjects];
+    [self.tempRelatedConstraints removeAllObjects];
     [self.constraintAttributes addObject:@(NSLayoutAttributeWidth)];
     return self;
 }
 
 - (ZXPAutoLayoutMaker *)height {
-    [self.tempConstraints removeAllObjects];
+    [self.tempRelatedConstraints removeAllObjects];
     [self.constraintAttributes addObject:@(NSLayoutAttributeHeight)];
     return self;
 }
 
 - (ZXPAutoLayoutMaker *)with {
-    [self.tempConstraints removeAllObjects];
+    [self.tempRelatedConstraints removeAllObjects];
     return self;
 }
 
@@ -162,7 +168,7 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
                                                                       multiplier:1.0
                                                                         constant:0];
         [self.view.superview addConstraint:constraintX];
-        [self.tempConstraints addObject:constraintX];
+        [self.tempRelatedConstraints addObject:constraintX];
         
         return self;
     };
@@ -179,7 +185,7 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
                                                                       multiplier:1.0
                                                                         constant:0];
         [self.view.superview addConstraint:constraintY];
-        [self.tempConstraints addObject:constraintY];
+        [self.tempRelatedConstraints addObject:constraintY];
         
         return self;
     };
@@ -235,20 +241,20 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
         return self;
     }
     
-    if (self.tempConstraints.count) {
+    if (self.tempRelatedConstraints.count) {
         
-        for (NSLayoutConstraint *constraint in self.tempConstraints) { //update constant in tempConstraints
+        for (NSLayoutConstraint *constraint in self.tempRelatedConstraints) { //update constant in tempRelatedConstraints
             constraint.constant = offset;
         }
         
         //clear
-        [self.tempConstraints removeAllObjects];
+        [self.tempRelatedConstraints removeAllObjects];
         [self.constraintAttributes removeAllObjects];
         
         return self;
     }
     
-    NSArray *array = [self.constraintAttributes valueForKeyPath:@"@distinctUnionOfObjects.self"];
+    NSArray *array = [self.constraintAttributes distinctUnionOfObjects];
     for (id attribute in array) {
         
         NSLayoutAttribute layoutAttribute = [attribute integerValue];
@@ -298,7 +304,7 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
         return self;
     }
     
-    NSArray *array = [self.constraintAttributes valueForKeyPath:@"@distinctUnionOfObjects.self"];
+    NSArray *array = [self.constraintAttributes distinctUnionOfObjects];
     if (self.layoutType == ZXPAutoLayoutMakerAdd) {
         
         for (id attribute in array) {
@@ -356,7 +362,7 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
     
     if ( view.zxp_attribute != NSLayoutAttributeNotAnAttribute ) {
         objc_setAssociatedObject(view, @selector(zxp_attribute), @(NSLayoutAttributeNotAnAttribute), OBJC_ASSOCIATION_ASSIGN);
-        [self.tempConstraints addObject:constraint]; //add constraint object
+        [self.tempRelatedConstraints addObject:constraint]; //add constraint object
     }
 }
 
@@ -374,27 +380,67 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
 
 @end
 
-#pragma mark - category
+#pragma mark - private category of array
+
+@implementation NSArray (ZXPPrivateOfAutoLayout)
+
+- (NSArray *)distinctUnionOfObjects {
+    return [self valueForKeyPath:@"@distinctUnionOfObjects.self"];
+}
+
+@end
+
+#pragma mark - public category of view
 
 @implementation UIView (ZXPAdditions)
 
-- (UIView *)zxp_top {
+- (id)zxp_top {
     objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeTop), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
-- (UIView *)zxp_left {
-    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeLeading), OBJC_ASSOCIATION_ASSIGN);
+- (id)zxp_left {
+    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeLeft), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
-- (UIView *)zxp_bottom {
+- (id)zxp_bottom {
     objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeBottom), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
-- (UIView *)zxp_right {
+- (id)zxp_right {
+    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeRight), OBJC_ASSOCIATION_ASSIGN);
+    return self;
+}
+
+- (id)zxp_leading {
+    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeLeading), OBJC_ASSOCIATION_ASSIGN);
+    return self;
+}
+
+- (id)zxp_trailing {
     objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeTrailing), OBJC_ASSOCIATION_ASSIGN);
+    return self;
+}
+
+- (id)zxp_width {
+    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeWidth), OBJC_ASSOCIATION_ASSIGN);
+    return self;
+}
+
+- (id)zxp_height {
+    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeHeight), OBJC_ASSOCIATION_ASSIGN);
+    return self;
+}
+
+- (id)zxp_centerX {
+    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeCenterX), OBJC_ASSOCIATION_ASSIGN);
+    return self;
+}
+
+- (id)zxp_centerY {
+    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeCenterY), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
@@ -408,6 +454,46 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
 
 - (void)zxp_updateConstraints:(void(^)(ZXPAutoLayoutMaker *layout))layout {
     layout([[ZXPAutoLayoutMaker alloc] initWithView:self type:ZXPAutoLayoutMakerUpdate]);
+}
+
+- (void)zxp_printConstraintsForSelf {
+    NSArray<__kindof NSLayoutConstraint *> *constrain = self.constraints;
+    NSArray<__kindof NSLayoutConstraint *> *superConstrain = self.superview.constraints;
+    NSMutableArray<__kindof NSLayoutConstraint *> *array = [NSMutableArray array];
+    [array addObjectsFromArray:constrain];
+    [array addObjectsFromArray:superConstrain];
+    [array enumerateObjectsUsingBlock:^(__kindof NSLayoutConstraint * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (obj.firstItem == self) {
+            NSLog(@"%@:%f",layoutAttributeString(obj.firstAttribute),obj.constant);
+        }
+    }];
+}
+
+NSString* layoutAttributeString(NSLayoutAttribute attribute) {
+    switch (attribute) {
+        case NSLayoutAttributeLeft:
+            return @"left";
+        case NSLayoutAttributeRight:
+            return @"right";
+        case NSLayoutAttributeTop:
+            return @"top";
+        case NSLayoutAttributeBottom:
+            return @"bottom";
+        case NSLayoutAttributeLeading:
+            return @"leading";
+        case NSLayoutAttributeTrailing:
+            return @"trailing";
+        case NSLayoutAttributeWidth:
+            return @"width";
+        case NSLayoutAttributeHeight:
+            return @"height";
+        case NSLayoutAttributeCenterX:
+            return @"centerX";
+        case NSLayoutAttributeCenterY:
+            return @"centerY";
+        default:
+            return @"not attribute";
+    }
 }
 
 @end

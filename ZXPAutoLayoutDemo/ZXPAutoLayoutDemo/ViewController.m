@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "ZXPAutoLayout.h"
 
 @interface ViewController ()
 
@@ -17,6 +18,19 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
+    
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    
+    UIView *view = [UIView new];
+    [self.view addSubview:view];
+    view.backgroundColor = [UIColor redColor];
+    [view zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
+        layout.edges.equalTo(self.view); //上下左右边距等于self.view
+    }];
+    [view zxp_printConstraintsForSelf];
 }
 
 - (void)didReceiveMemoryWarning {
