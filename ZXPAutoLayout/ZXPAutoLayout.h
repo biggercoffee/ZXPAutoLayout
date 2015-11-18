@@ -32,19 +32,18 @@
 @property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *edges; /**< 设置上下左右边距 */
 
 @property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *with;
-
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *(^offset)(CGFloat offset); /**< 设置约束的值 */
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *(^equalTo)(id value); /**< 如果是nsnumber类型就设置约束的值 , 如果是uiview类型就设置为相等于另一个view的约束 */
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *(^size)(CGSize size); /**< 约束大小 */
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *(^origin)(CGPoint origin); /**< 约束位置,以左上角为原点 */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^offset)(CGFloat offset); /**< 设置约束的值 */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^equalTo)(id value); /**< 如果是nsnumber类型就设置约束的值 , 如果是uiview类型就设置为相等于另一个view的约束 */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^size)(CGSize size); /**< 约束大小 */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^origin)(CGPoint origin); /**< 约束位置,以左上角为原点 */
 
 //居中
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *(^center)(UIView *view);
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *(^centerX)(UIView *view);
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *(^centerY)(UIView *view);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^center)(UIView *view);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^centerX)(UIView *view);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^centerY)(UIView *view);
 
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *(^greaterThanOrEqual)(id value); /**< 大于等于 */
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *(^lessThanOrEqual)(id value); /**< 小于等于 */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^greaterThanOrEqual)(id value); /**< 大于等于 */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^lessThanOrEqual)(id value); /**< 小于等于 */
 
 /**
  *  @author coffee
@@ -53,7 +52,7 @@
     value : nsnumber or uiview
     multiplier : 0 -- 1
  */
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *(^equalToWithMultiplier)(id value,CGFloat multiplier);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^equalToWithMultiplier)(id value,CGFloat multiplier);
 
 /**
  *  @author coffee
@@ -62,7 +61,7 @@
     value : nsnumber or uiview
     multiplier : 0 -- 1
  */
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *(^greaterThanOrEqualWithMultiplier)(id value,CGFloat multiplier);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^greaterThanOrEqualWithMultiplier)(id value,CGFloat multiplier);
 
 /**
  *  @author coffee
@@ -71,7 +70,7 @@
     value : nsnumber or uiview
     multiplier : 0 -- 1
  */
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *(^lessThanOrEqualWithMultiplier)(id value,CGFloat multiplier);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^lessThanOrEqualWithMultiplier)(id value,CGFloat multiplier);
 
 - (instancetype)initWithView:(UIView *)view type:(id)type;
 
@@ -102,7 +101,6 @@
 - (void)zxp_updateConstraints:(void(^)(ZXPAutoLayoutMaker *layout))layout;
 
 - (void)zxp_printConstraintsForSelf;
-
 @end
 
 

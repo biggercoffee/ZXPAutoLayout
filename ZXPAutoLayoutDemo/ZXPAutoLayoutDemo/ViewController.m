@@ -31,6 +31,16 @@
         layout.edges.equalTo(self.view); //上下左右边距等于self.view
     }];
     [view zxp_printConstraintsForSelf];
+    
+    UIView *blueView = [UIView new];
+    [view addSubview:blueView];
+    view.backgroundColor = [UIColor blueColor];
+    [blueView zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
+        layout.top.left.offset(20);
+        layout.width.height.offset(100);
+    }];
+    NSLog(@"blueView:");
+    [blueView zxp_printConstraintsForSelf];
 }
 
 - (void)didReceiveMemoryWarning {

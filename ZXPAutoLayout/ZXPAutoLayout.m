@@ -193,51 +193,39 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
 
 - (ZXPAutoLayoutMaker *(^)(id, CGFloat))equalToWithMultiplier {
     return ^(id value,CGFloat multiplier) {
-        
-        if ([value isKindOfClass:[NSNumber class]]) {
-            return [self setupConstraint:[value floatValue] relatedBy:NSLayoutRelationEqual multiplierBy:multiplier];
-        }
-        else if ([value isKindOfClass:[UIView class]]) {
-            return [self setupConstraintWithToItem:value relatedBy:NSLayoutRelationEqual multiplierBy:multiplier];
-        }
-        NSAssert(NO, @"%@ equalTo : Does not supper type",self.view);
-        return self;
+        return [self constraint:value relatedBy:NSLayoutRelationEqual multiplier:multiplier];
     };
 }
 
 - (ZXPAutoLayoutMaker *(^)(id, CGFloat))greaterThanOrEqualWithMultiplier {
     return ^(id value,CGFloat multiplier){
-        if ([value isKindOfClass:[NSNumber class]]) {
-            return [self setupConstraint:[value floatValue] relatedBy:NSLayoutRelationGreaterThanOrEqual multiplierBy:multiplier];
-        }
-        else if ([value isKindOfClass:[UIView class]]) {
-            return [self setupConstraintWithToItem:value relatedBy:NSLayoutRelationGreaterThanOrEqual multiplierBy:multiplier];
-        }
-        NSAssert(NO, @"%@ greaterThanOrEqual : Does not supper type",self.view);
-        return self;
+        return [self constraint:value relatedBy:NSLayoutRelationGreaterThanOrEqual multiplier:multiplier];
     };
 }
 
 - (ZXPAutoLayoutMaker *(^)(id, CGFloat))lessThanOrEqualWithMultiplier {
     return ^(id value,CGFloat multiplier) {
-        
-        if ([value isKindOfClass:[NSNumber class]]) {
-            return [self setupConstraint:[value floatValue] relatedBy:NSLayoutRelationLessThanOrEqual multiplierBy:multiplier];
-        }
-        else if ([value isKindOfClass:[UIView class]]) {
-            return [self setupConstraintWithToItem:value relatedBy:NSLayoutRelationLessThanOrEqual multiplierBy:multiplier];
-        }
-        NSAssert(NO, @"%@ lessThanOrEqual : Does not supper type",self.view);
-        return self;
+        return [self constraint:value relatedBy:NSLayoutRelationLessThanOrEqual multiplier:multiplier];
     };
 }
 
-#pragma mark - private
+#pragma mark - private methods
+
+- (id)constraint:(id)value relatedBy:(NSLayoutRelation)relateBy multiplier:(CGFloat)multiplier {
+    if ([value isKindOfClass:[NSNumber class]]) {
+        return [self setupConstraint:[value floatValue] relatedBy:relateBy multiplierBy:multiplier];
+    }
+    else if ([value isKindOfClass:[UIView class]]) {
+        return [self setupConstraintWithToItem:value relatedBy:relateBy multiplierBy:multiplier];
+    }
+    NSAssert(NO, @"%@ : Does not supper type",self.view);
+    return self;
+}
 
 - (ZXPAutoLayoutMaker *)setupConstraint:(CGFloat)offset relatedBy:(NSLayoutRelation)related multiplierBy:(CGFloat)multiplier {
     
     if (!self.view.superview) {
-        NSAssert(NO, @"%@ , no superview",self.view.class);
+        NSAssert(NO, @"%@ , not superview",self.view.class);
         return self;
     }
     
