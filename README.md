@@ -15,7 +15,8 @@
 
 ##### 加入ZXPAutoLayout 
 ##### 1.直接下载并导入ZXPAutoLayout.h文件
-##### 2.使用Cocoapod搜索: pod search ZXPAutoLayout cocoapod安装: pod 'ZXPAutoLayout', :head
+##### 2.使用Cocoapod搜索: pod search ZXPAutoLayout 
+#####   cocoapod安装: pod 'ZXPAutoLayout', :head
 
 ##### 添加一个与self.view的上下左右相等的约束
 <pre><code>
