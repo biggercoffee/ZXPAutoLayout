@@ -34,13 +34,23 @@
     
     UIView *blueView = [UIView new];
     [view addSubview:blueView];
-    view.backgroundColor = [UIColor blueColor];
+    blueView.backgroundColor = [UIColor blueColor];
     [blueView zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
         layout.top.left.offset(20);
         layout.width.height.offset(100);
     }];
     NSLog(@"blueView:");
     [blueView zxp_printConstraintsForSelf];
+    
+    UIView *grayView = [UIView new];
+    [self.view addSubview:grayView];
+    grayView.backgroundColor = [UIColor grayColor];
+    [grayView zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
+        layout.top.offset(100);
+        layout.left.offset(20);
+        layout.height.offset(100);
+        layout.width.equalTo(blueView).offset(40);
+    }];
 }
 
 - (void)didReceiveMemoryWarning {

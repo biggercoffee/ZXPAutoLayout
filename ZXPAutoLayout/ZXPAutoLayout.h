@@ -3,7 +3,7 @@
 //  layout
 /*
  
-    version : 0.1.0
+    version : 0.2.0
     support : Xcode7.0以上 , iOS 7 以上
     简洁方便的autolayout,有任何问题欢迎issue 我
     github : https://github.com/biggercoffee/ZXPAutolayout
@@ -92,8 +92,6 @@
 @property (nonatomic,strong,readonly) id zxp_centerX;
 @property (nonatomic,strong,readonly) id zxp_centerY;
 
-@property (nonatomic,assign,readonly) NSLayoutAttribute zxp_attribute;
-
 //add
 - (void)zxp_addConstraints:(void(^)(ZXPAutoLayoutMaker *layout))layout;
 
@@ -101,6 +99,7 @@
 - (void)zxp_updateConstraints:(void(^)(ZXPAutoLayoutMaker *layout))layout;
 
 - (void)zxp_printConstraintsForSelf;
+
 @end
 
 

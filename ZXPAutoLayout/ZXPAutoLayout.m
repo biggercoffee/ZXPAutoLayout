@@ -15,8 +15,9 @@
 
 @end
 
-static NSString *ZXPAutoLayoutMakerAdd = @"ZXPAutoLayoutMakerAdd";
-static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
+static NSString * const ZXPAutoLayoutMakerAdd = @"ZXPAutoLayoutMakerAdd";
+static NSString * const ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
+static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
 
 @interface ZXPAutoLayoutMaker ()
 
@@ -193,35 +194,57 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
 
 - (ZXPAutoLayoutMaker *(^)(id, CGFloat))equalToWithMultiplier {
     return ^(id value,CGFloat multiplier) {
-        return [self constraint:value relatedBy:NSLayoutRelationEqual multiplier:multiplier];
+        return [self reAddConstraint:value relatedBy:NSLayoutRelationEqual multiplier:multiplier];
     };
 }
 
 - (ZXPAutoLayoutMaker *(^)(id, CGFloat))greaterThanOrEqualWithMultiplier {
     return ^(id value,CGFloat multiplier){
-        return [self constraint:value relatedBy:NSLayoutRelationGreaterThanOrEqual multiplier:multiplier];
+        return [self reAddConstraint:value relatedBy:NSLayoutRelationGreaterThanOrEqual multiplier:multiplier];
     };
 }
 
 - (ZXPAutoLayoutMaker *(^)(id, CGFloat))lessThanOrEqualWithMultiplier {
     return ^(id value,CGFloat multiplier) {
-        return [self constraint:value relatedBy:NSLayoutRelationLessThanOrEqual multiplier:multiplier];
+        return [self reAddConstraint:value relatedBy:NSLayoutRelationLessThanOrEqual multiplier:multiplier];
     };
 }
 
 #pragma mark - private methods
 
-- (id)constraint:(id)value relatedBy:(NSLayoutRelation)relateBy multiplier:(CGFloat)multiplier {
+/**
+ *  @author coffee
+ *
+ *  @brief  添加约束如果存在则会先删除在添加
+ *
+ *  @param value      view or nsnumber
+ *  @param relateBy   NSLayoutRelation 属性
+ *  @param multiplier 比例
+ *
+ *  @return self
+ */
+- (id)reAddConstraint:(id)value relatedBy:(NSLayoutRelation)relateBy multiplier:(CGFloat)multiplier {
     if ([value isKindOfClass:[NSNumber class]]) {
         return [self setupConstraint:[value floatValue] relatedBy:relateBy multiplierBy:multiplier];
     }
     else if ([value isKindOfClass:[UIView class]]) {
-        return [self setupConstraintWithToItem:value relatedBy:relateBy multiplierBy:multiplier];
+        return [self reAddConstraintOfAttributesWithToItem:value relatedBy:relateBy multiplierBy:multiplier];
     }
     NSAssert(NO, @"%@ : Does not supper type",self.view);
     return self;
 }
 
+/**
+ *  @author coffee
+ *
+ *  @brief  设置约束值,如果tempRelatedConstraints不为空就更新tempRelatedConstraints里的约束(constant),否则就添加约束或者更新约束
+ *
+ *  @param offset     constant
+ *  @param related    等于,小于等于,大于等于
+ *  @param multiplier 比例
+ *
+ *  @return self
+ */
 - (ZXPAutoLayoutMaker *)setupConstraint:(CGFloat)offset relatedBy:(NSLayoutRelation)related multiplierBy:(CGFloat)multiplier {
     
     if (!self.view.superview) {
@@ -245,36 +268,34 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
     NSArray *array = [self.constraintAttributes distinctUnionOfObjects];
     for (id attribute in array) {
         
-        NSLayoutAttribute layoutAttribute = [attribute integerValue];
+        NSLayoutAttribute firstAttribute = [attribute integerValue];
         
         if ( self.layoutType == ZXPAutoLayoutMakerAdd ) {
             
-            if (layoutAttribute == NSLayoutAttributeWidth || layoutAttribute == NSLayoutAttributeHeight) {
-                
-                [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.view
-                                                                      attribute:layoutAttribute
-                                                                      relatedBy:related
-                                                                         toItem:nil
-                                                                      attribute:NSLayoutAttributeNotAnAttribute
-                                                                     multiplier:multiplier
-                                                                       constant:offset]];
-                
+            id view = nil;
+            id toItem = nil;
+            NSLayoutAttribute secondAttribute = NSLayoutAttributeNotAnAttribute;
+            
+            if (firstAttribute == NSLayoutAttributeWidth || firstAttribute == NSLayoutAttributeHeight) {
+                view = self.view;
             }
             else {
-                
-                [self.view.superview addConstraint:[NSLayoutConstraint constraintWithItem:self.view
-                                                                                attribute:layoutAttribute
-                                                                                relatedBy:related
-                                                                                   toItem:self.view.superview
-                                                                                attribute:layoutAttribute
-                                                                               multiplier:multiplier
-                                                                                 constant:offset]];
-                
+                view = self.view.superview;
+                toItem = self.view.superview;
+                secondAttribute = firstAttribute;
             }
+            
+            [view addConstraint:[NSLayoutConstraint constraintWithItem:self.view
+                                                             attribute:firstAttribute
+                                                             relatedBy:related
+                                                                toItem:toItem
+                                                             attribute:secondAttribute
+                                                            multiplier:multiplier
+                                                              constant:offset]];
             
         }
         else { //update
-            [self updateConstraintWithView:self.view attribute:layoutAttribute value:offset];
+            [self updateConstraintWithFirstView:self.view firstAttribute:firstAttribute constant:offset];
         }
         
     } //end for
@@ -285,48 +306,47 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
     return self;
 }
 
-- (ZXPAutoLayoutMaker *)setupConstraintWithToItem:(UIView *)view relatedBy:(NSLayoutRelation)related multiplierBy:(CGFloat)multiplier {
+/**
+ *  @author coffee
+ *
+ *  @brief  根据数组(constraintAttributes变量)里保存的约束属性进行约束添加,如果约束存在则会先移除在进行添加
+            添加完约束之后会清空此数组(constraintAttributes变量) 并 重置第二个view的 NSLayoutAttribute 属性为 NSLayoutAttributeNotAnAttribute
+ *
+ *  @param secondView 第二个view
+ *  @param related    等于,小于等于,大于等于
+ *  @param multiplier 比例
+ *
+ *  @return 当前对象
+ */
+- (ZXPAutoLayoutMaker *)reAddConstraintOfAttributesWithToItem:(UIView *)secondView relatedBy:(NSLayoutRelation)related multiplierBy:(CGFloat)multiplier {
     
     if (!self.view.superview) {
-        NSAssert(NO, @"%@ , no superview",self.view.class);
+        NSAssert(NO, @"%@ , not superview",self.view.class);
         return self;
     }
     
-    NSArray *array = [self.constraintAttributes distinctUnionOfObjects];
-    if (self.layoutType == ZXPAutoLayoutMakerAdd) {
-        
-        for (id attribute in array) {
-            
-            NSLayoutAttribute layoutAttribute = [attribute integerValue];
-            
-            NSLayoutAttribute relatedAttribute = view.zxp_attribute != NSLayoutAttributeNotAnAttribute ? view.zxp_attribute : layoutAttribute;
-            
-            //add constraint
-            [self setupConstraintWithAttribute:layoutAttribute toItem:view toAttribute:relatedAttribute relatedBy:related multiplierBy:multiplier];
-            
-        }
-        
-    }
-    else { //update
-        
+    NSArray *distinctUnionAttributes = [self.constraintAttributes distinctUnionOfObjects];
+    NSLayoutAttribute secondAttribute = [objc_getAssociatedObject(secondView, &ZXPAttributeKey) integerValue];
+    
+    if (self.layoutType == ZXPAutoLayoutMakerUpdate) { //如果是更新约束,就先删掉view对应的相对约束
         [self.view.superview.constraints enumerateObjectsUsingBlock:^(__kindof NSLayoutConstraint * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             
-            for (id attribute in array) {
-                
-                NSLayoutAttribute layoutAttribute = [attribute integerValue];
-                NSLayoutAttribute relatedAttribute = view.zxp_attribute != NSLayoutAttributeNotAnAttribute ? view.zxp_attribute : layoutAttribute;
-                
-                if (obj.firstItem == self.view && obj.firstAttribute == layoutAttribute) {
-                    
+            for (id attribute in distinctUnionAttributes) {
+                if (obj.firstItem == self.view && obj.firstAttribute == [attribute integerValue]) {
                     [self.view.superview removeConstraint:obj]; //remove
-                    //add constraint
-                    [self setupConstraintWithAttribute:layoutAttribute toItem:view toAttribute:relatedAttribute relatedBy:related multiplierBy:multiplier];
-                    
                 }
-                
             }
             
         }];
+    }
+    
+    for (id attribute in distinctUnionAttributes) {
+        NSLayoutAttribute firstAttribute = [attribute integerValue];
+        NSLayoutAttribute toAttribute = secondAttribute != NSLayoutAttributeNotAnAttribute ? secondAttribute : firstAttribute;
+        
+        //add constraint
+        [self addConstraintInSuperviewWithFirstAttribute:firstAttribute toItem:secondView toAttribute:toAttribute relatedBy:related multiplierBy:multiplier];
+        [self resetAttributeWithView:secondView];
     }
     
     //clear attributes in array
@@ -335,31 +355,31 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
     return self;
 }
 
-- (void)setupConstraintWithAttribute:(NSLayoutAttribute)layoutAttribute toItem:(UIView *)view toAttribute:(NSLayoutAttribute)relatedAttribute relatedBy:(NSLayoutRelation)related multiplierBy:(CGFloat)multiplier {
+- (void)addConstraintInSuperviewWithFirstAttribute:(NSLayoutAttribute)firstAttribute toItem:(UIView *)view toAttribute:(NSLayoutAttribute)relatedAttribute relatedBy:(NSLayoutRelation)related multiplierBy:(CGFloat)multiplier {
     NSLayoutConstraint *constraint = [NSLayoutConstraint constraintWithItem:self.view
-                                                                  attribute:layoutAttribute
+                                                                  attribute:firstAttribute
                                                                   relatedBy:related
                                                                      toItem:view
                                                                   attribute:relatedAttribute
                                                                  multiplier:multiplier
                                                                    constant:0];
-    
-    
     [self.view.superview addConstraint:constraint];//add constraint in superview
-    
-    
-    if ( view.zxp_attribute != NSLayoutAttributeNotAnAttribute ) {
-        objc_setAssociatedObject(view, @selector(zxp_attribute), @(NSLayoutAttributeNotAnAttribute), OBJC_ASSOCIATION_ASSIGN);
-        [self.tempRelatedConstraints addObject:constraint]; //add constraint object
+    [self.tempRelatedConstraints addObject:constraint]; //add constraint object in the array
+}
+
+- (void)resetAttributeWithView:(UIView *)view {
+    NSLayoutAttribute secondAttribute = [objc_getAssociatedObject(view, &ZXPAttributeKey) integerValue];
+    if ( secondAttribute != NSLayoutAttributeNotAnAttribute ) {
+        objc_setAssociatedObject(view, &ZXPAttributeKey, @(NSLayoutAttributeNotAnAttribute), OBJC_ASSOCIATION_ASSIGN);
     }
 }
 
-- (void)updateConstraintWithView:(UIView *)view attribute:(NSLayoutAttribute)attribute value:(float) value {
+- (void)updateConstraintWithFirstView:(UIView *)view firstAttribute:(NSLayoutAttribute)attribute constant:(CGFloat)constant {
     
     NSArray<__kindof NSLayoutConstraint *> *constraints = attribute == NSLayoutAttributeWidth || attribute == NSLayoutAttributeHeight ? view.constraints : view.superview.constraints;
     [constraints enumerateObjectsUsingBlock:^(__kindof NSLayoutConstraint * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if (obj.firstItem == view && obj.firstAttribute == attribute) {
-            obj.constant = value;
+            obj.constant = constant;
             *stop = YES;
         }
     }];
@@ -383,57 +403,53 @@ static NSString *ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
 @implementation UIView (ZXPAdditions)
 
 - (id)zxp_top {
-    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeTop), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeTop), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_left {
-    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeLeft), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeLeft), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_bottom {
-    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeBottom), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeBottom), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_right {
-    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeRight), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeRight), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_leading {
-    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeLeading), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeLeading), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_trailing {
-    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeTrailing), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeTrailing), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_width {
-    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeWidth), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeWidth), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_height {
-    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeHeight), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeHeight), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_centerX {
-    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeCenterX), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeCenterX), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_centerY {
-    objc_setAssociatedObject(self, @selector(zxp_attribute), @(NSLayoutAttributeCenterY), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeCenterY), OBJC_ASSOCIATION_ASSIGN);
     return self;
-}
-
-- (NSLayoutAttribute)zxp_attribute {
-    return [objc_getAssociatedObject(self, @selector(zxp_attribute)) integerValue];
 }
 
 - (void)zxp_addConstraints:(void(^)(ZXPAutoLayoutMaker *layout))layout {
