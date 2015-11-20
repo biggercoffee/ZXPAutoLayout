@@ -134,7 +134,7 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(CGSize))size {
+- (ZXPAutoLayoutMaker *(^)(CGSize))sizeOffset {
     return ^(CGSize size) {
         self.width.offset(size.width);
         self.height.offset(size.height);
@@ -142,7 +142,7 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(CGPoint))origin {
+- (ZXPAutoLayoutMaker *(^)(CGPoint))originOffset {
     return ^(CGPoint origin) {
         self.top.offset(origin.y);
         self.left.offset(origin.x);
@@ -150,7 +150,7 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(CGRect))frame {
+- (ZXPAutoLayoutMaker *(^)(CGRect))frameOffset {
     return ^(CGRect frame) {
         return self.top.offset(CGRectGetMinY(frame)).left.offset(CGRectGetMinX(frame)).width.offset(CGRectGetWidth(frame)).height.offset(CGRectGetHeight(frame));
     };

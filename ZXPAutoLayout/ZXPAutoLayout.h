@@ -3,7 +3,7 @@
 //  layout
 /*
  
-    version : 0.3.0
+    version : 0.3.1
     support : Xcode7.0以上 , iOS 7 以上
     简洁方便的autolayout,有任何问题欢迎issue 我
     github : https://github.com/biggercoffee/ZXPAutolayout
@@ -37,15 +37,15 @@
 //---- setting constraints
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^offset)(CGFloat offset); /**< 设置约束的值 */
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^equalTo)(id value); /**< 如果是nsnumber类型就设置约束的值 , 如果是uiview类型就设置为相等于另一个view的约束 */
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^size)(CGSize size); /**< 约束大小 */
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^origin)(CGPoint origin); /**< 约束位置,以左上角为原点 */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^sizeOffset)(CGSize size); /**< 约束大小 */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^originOffset)(CGPoint origin); /**< 约束位置,以左上角为原点 */
 
 /**
  *  @author coffee
  *
  *  @brief  setting top,left,width,height
  */
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^frame)(CGRect frame);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^frameOffset)(CGRect frame);
 
 /**
  *  @author coffee
