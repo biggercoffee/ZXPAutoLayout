@@ -8,7 +8,7 @@
 
 #import "ViewController.h"
 #import "ZXPAutoLayout.h"
-
+#import <objc/runtime.h>
 @interface ViewController ()
 
 @end
@@ -46,11 +46,12 @@
     [self.view addSubview:grayView];
     grayView.backgroundColor = [UIColor grayColor];
     [grayView zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
-        layout.top.offset(100);
+        layout.top.equalTo(blueView.zxp_bottom).offset(10);//在blueview的下边并加10的距离
         layout.left.offset(20);
-        layout.height.offset(100);
-        layout.width.equalTo(blueView).offset(40);
+        layout.height.equalTo(blueView); //高度和blueview一样
+        layout.width.equalTo(blueView).multiplier(0.5);//是blueview宽度的一半
     }];
+    
 }
 
 - (void)didReceiveMemoryWarning {

@@ -3,7 +3,7 @@
 //  layout
 /*
  
-    version : 0.2.0
+    version : 0.3.0
     support : Xcode7.0以上 , iOS 7 以上
     简洁方便的autolayout,有任何问题欢迎issue 我
     github : https://github.com/biggercoffee/ZXPAutolayout
@@ -19,6 +19,7 @@
 
 @interface ZXPAutoLayoutMaker : NSObject
 
+//--- constraint attributes
 @property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *top; /**< 上边距 */
 @property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *left; /**< 左边距 */
 @property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *bottom; /**< 下边距 */
@@ -32,19 +33,41 @@
 @property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *edges; /**< 设置上下左右边距 */
 
 @property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *with;
+
+//---- setting constraints
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^offset)(CGFloat offset); /**< 设置约束的值 */
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^equalTo)(id value); /**< 如果是nsnumber类型就设置约束的值 , 如果是uiview类型就设置为相等于另一个view的约束 */
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^size)(CGSize size); /**< 约束大小 */
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^origin)(CGPoint origin); /**< 约束位置,以左上角为原点 */
+
+/**
+ *  @author coffee
+ *
+ *  @brief  setting top,left,width,height
+ */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^frame)(CGRect frame);
+
+/**
+ *  @author coffee
+ *
+ *  @brief  setting top,left,bottom,right
+ */
+@property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^insets)(UIEdgeInsets insets);
+
+//优先级和比例
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^priority)(UILayoutPriority priority);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^multiplier)(CGFloat multiplier);
 
 //居中
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^center)(UIView *view);
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^centerX)(UIView *view);
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^centerY)(UIView *view);
 
+//大于等于,小于等于
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^greaterThanOrEqual)(id value); /**< 大于等于 */
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^lessThanOrEqual)(id value); /**< 小于等于 */
 
+//------带有两个参数的block:约束and比例
 /**
  *  @author coffee
  *
@@ -72,6 +95,7 @@
  */
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^lessThanOrEqualWithMultiplier)(id value,CGFloat multiplier);
 
+//init
 - (instancetype)initWithView:(UIView *)view type:(id)type;
 
 @end

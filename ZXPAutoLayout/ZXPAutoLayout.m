@@ -31,7 +31,7 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
 @property (nonatomic,strong) NSMutableArray<NSLayoutConstraint *> *tempRelatedConstraints;
 
 @property (nonatomic,strong) UIView *view;
-
+@property (strong,nonatomic) NSLayoutConstraint *lastConstraint;
 @property (nonatomic,assign) id layoutType;
 
 @end
@@ -150,6 +150,18 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
     };
 }
 
+- (ZXPAutoLayoutMaker *(^)(CGRect))frame {
+    return ^(CGRect frame) {
+        return self.top.offset(CGRectGetMinY(frame)).left.offset(CGRectGetMinX(frame)).width.offset(CGRectGetWidth(frame)).height.offset(CGRectGetHeight(frame));
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(UIEdgeInsets))insets {
+    return ^(UIEdgeInsets insets) {
+        return self.top.offset(insets.top).left.offset(insets.left).bottom.offset(insets.bottom).right.offset(insets.right);
+    };
+}
+
 - (ZXPAutoLayoutMaker *(^)(UIView *))center {
     return ^(UIView *view) {
         self.centerX(view);
@@ -188,6 +200,24 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
         [self.view.superview addConstraint:constraintY];
         [self.tempRelatedConstraints addObject:constraintY];
         
+        return self;
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(UILayoutPriority))priority {
+    return ^(UILayoutPriority priority) {
+        self.lastConstraint.priority = priority;
+        return self;
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(CGFloat))multiplier {
+    return ^(CGFloat multiplier) {
+        if (self.lastConstraint) {            
+            [self.view.superview removeConstraint:self.lastConstraint];
+            NSLayoutConstraint *obj = self.lastConstraint;
+            [self.view.superview addConstraint:[NSLayoutConstraint constraintWithItem:obj.firstItem attribute:obj.firstAttribute relatedBy:obj.relation toItem:obj.secondItem attribute:obj.secondAttribute multiplier:multiplier constant:obj.constant]];
+        }
         return self;
     };
 }
@@ -364,6 +394,7 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
                                                                  multiplier:multiplier
                                                                    constant:0];
     [self.view.superview addConstraint:constraint];//add constraint in superview
+    self.lastConstraint = constraint;
     [self.tempRelatedConstraints addObject:constraint]; //add constraint object in the array
 }
 
