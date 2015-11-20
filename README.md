@@ -13,9 +13,9 @@
 
 #### 现在简单使用ZXPAutoLayout来布局(注:使用自动布局之前要先添加到父视图里)
 
-##### 加入ZXPAutoLayout 
-##### 1.直接下载并导入ZXPAutoLayout.h文件
-##### 2.使用Cocoapod搜索: pod search ZXPAutoLayout 
+##### 加入ZXPAutoLayout的方法 
+##### 第一种方法:直接下载并导入ZXPAutoLayout.h文件
+##### 第二种方法:使用Cocoapod搜索: pod search ZXPAutoLayout 
 #####   cocoapod安装: pod 'ZXPAutoLayout', :head
 
 ##### 添加一个与self.view的上下左右相等的约束
