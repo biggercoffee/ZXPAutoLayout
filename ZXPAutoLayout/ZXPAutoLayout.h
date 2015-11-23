@@ -3,7 +3,7 @@
 //  layout
 /*
  
-    version : 0.3.1
+    version : 0.3.2
     support : Xcode7.0以上 , iOS 7 以上
     简洁方便的autolayout,有任何问题欢迎issue 我
     github : https://github.com/biggercoffee/ZXPAutolayout
@@ -27,18 +27,23 @@
 @property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *leading;
 @property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *trailing;
 
+//居中
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *center;
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *centerX;
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *centerY;
+
 @property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *width; /**< 宽度 */
 @property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *height; /**< 高度 */
 
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *edges; /**< 设置上下左右边距 */
+@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *edges; /**< add top,left,bottom, right */
 
 @property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *with;
 
 //---- setting constraints
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^offset)(CGFloat offset); /**< 设置约束的值 */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^offset)(CGFloat offset); /**< setting constant */
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^equalTo)(id value); /**< 如果是nsnumber类型就设置约束的值 , 如果是uiview类型就设置为相等于另一个view的约束 */
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^sizeOffset)(CGSize size); /**< 约束大小 */
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^originOffset)(CGPoint origin); /**< 约束位置,以左上角为原点 */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^sizeOffset)(CGSize size); /**< setting width,height */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^originOffset)(CGPoint origin); /**< setting top,left */
 
 /**
  *  @author coffee
@@ -57,11 +62,6 @@
 //优先级和比例
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^priority)(UILayoutPriority priority);
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^multiplier)(CGFloat multiplier);
-
-//居中
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^center)(UIView *view);
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^centerX)(UIView *view);
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^centerY)(UIView *view);
 
 //大于等于,小于等于
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^greaterThanOrEqual)(id value); /**< 大于等于 */
@@ -122,6 +122,7 @@
 //update
 - (void)zxp_updateConstraints:(void(^)(ZXPAutoLayoutMaker *layout))layout;
 
+//print
 - (void)zxp_printConstraintsForSelf;
 
 @end

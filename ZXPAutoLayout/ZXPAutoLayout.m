@@ -89,6 +89,25 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
     return self;
 }
 
+- (ZXPAutoLayoutMaker *)center {
+    [self.tempRelatedConstraints removeAllObjects];
+    [self.constraintAttributes addObject:@(NSLayoutAttributeCenterX)];
+    [self.constraintAttributes addObject:@(NSLayoutAttributeCenterY)];
+    return self;
+}
+
+- (ZXPAutoLayoutMaker *)centerX {
+    [self.tempRelatedConstraints removeAllObjects];
+    [self.constraintAttributes addObject:@(NSLayoutAttributeCenterX)];
+    return self;
+}
+
+- (ZXPAutoLayoutMaker *)centerY {
+    [self.tempRelatedConstraints removeAllObjects];
+    [self.constraintAttributes addObject:@(NSLayoutAttributeCenterY)];
+    return self;
+}
+
 - (ZXPAutoLayoutMaker *)width {
     [self.tempRelatedConstraints removeAllObjects];
     [self.constraintAttributes addObject:@(NSLayoutAttributeWidth)];
@@ -159,48 +178,6 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
 - (ZXPAutoLayoutMaker *(^)(UIEdgeInsets))insets {
     return ^(UIEdgeInsets insets) {
         return self.top.offset(insets.top).left.offset(insets.left).bottom.offset(insets.bottom).right.offset(insets.right);
-    };
-}
-
-- (ZXPAutoLayoutMaker *(^)(UIView *))center {
-    return ^(UIView *view) {
-        self.centerX(view);
-        self.centerY(view);
-        return self;
-    };
-}
-
-- (ZXPAutoLayoutMaker *(^)(UIView *))centerX {
-    return ^(UIView *view) {
-        
-        NSLayoutConstraint *constraintX = [NSLayoutConstraint constraintWithItem:self.view
-                                                                       attribute:NSLayoutAttributeCenterX
-                                                                       relatedBy:NSLayoutRelationEqual
-                                                                          toItem:view
-                                                                       attribute:NSLayoutAttributeCenterX
-                                                                      multiplier:1.0
-                                                                        constant:0];
-        [self.view.superview addConstraint:constraintX];
-        [self.tempRelatedConstraints addObject:constraintX];
-        
-        return self;
-    };
-}
-
-- (ZXPAutoLayoutMaker *(^)(UIView *))centerY {
-    return ^(UIView *view) {
-        
-        NSLayoutConstraint *constraintY = [NSLayoutConstraint constraintWithItem:self.view
-                                                                       attribute:NSLayoutAttributeCenterY
-                                                                       relatedBy:NSLayoutRelationEqual
-                                                                          toItem:view
-                                                                       attribute:NSLayoutAttributeCenterY
-                                                                      multiplier:1.0
-                                                                        constant:0];
-        [self.view.superview addConstraint:constraintY];
-        [self.tempRelatedConstraints addObject:constraintY];
-        
-        return self;
     };
 }
 
