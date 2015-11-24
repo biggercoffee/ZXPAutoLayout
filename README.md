@@ -121,4 +121,7 @@
         }];
 </code></pre>
 
+#### 注意事项:
+##### 在IB里给view加的约束,左边距leading,右边距是trailing,所以在使用ZXPAutoLayout来更新在IB里的约束的时候,请使用leading 和 trailing属性.
+
 #### 有任何问题欢迎issue我,你们的issue才是我的动力~! thanks
