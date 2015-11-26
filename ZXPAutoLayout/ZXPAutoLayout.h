@@ -3,10 +3,11 @@
 //  layout
 /*
  
-    version : 0.3.2
+    version : 0.3.3
     support : Xcode7.0以上 , iOS 7 以上
     简洁方便的autolayout,有任何问题欢迎issue 我
     github : https://github.com/biggercoffee/ZXPAutolayout
+    csdn blog : http://blog.csdn.net/biggercoffee
     QQ : 974792506
  
  */

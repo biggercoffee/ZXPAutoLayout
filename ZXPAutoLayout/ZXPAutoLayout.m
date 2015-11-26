@@ -7,6 +7,7 @@
 //
 
 #import "ZXPAutoLayout.h"
+
 #import <objc/runtime.h>
 
 @interface NSArray (ZXPPrivateOfAutoLayout)
@@ -38,6 +39,77 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
 
 @implementation ZXPAutoLayoutMaker
 
++ (void)load {
+    
+    NSMutableArray<NSString *> *layoutAttributeStringList = [NSMutableArray array];
+    NSMutableArray<NSNumber *> *layoutAttributeValueList = [NSMutableArray array];
+#define enumToString(value) [layoutAttributeStringList addObject:@#value]; \
+                            [layoutAttributeValueList addObject:@(value)];
+    enumToString(NSLayoutAttributeLeft)
+    enumToString(NSLayoutAttributeRight)
+    enumToString(NSLayoutAttributeTop)
+    enumToString(NSLayoutAttributeBottom)
+    enumToString(NSLayoutAttributeLeading)
+    enumToString(NSLayoutAttributeTrailing)
+    enumToString(NSLayoutAttributeWidth)
+    enumToString(NSLayoutAttributeHeight)
+    enumToString(NSLayoutAttributeCenterX)
+    enumToString(NSLayoutAttributeCenterY)
+#undef enumToString
+    
+    objc_setAssociatedObject([self class], @selector(swizzleMethodForAttribute),
+                             @{@"keys":layoutAttributeStringList,
+                               @"values":layoutAttributeValueList},
+                             OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    
+    NSArray<NSString *> *methods = @[NSStringFromSelector(@selector(top)),
+                                     NSStringFromSelector(@selector(left)),
+                                     NSStringFromSelector(@selector(bottom)),
+                                     NSStringFromSelector(@selector(right)),
+                                     NSStringFromSelector(@selector(width)),
+                                     NSStringFromSelector(@selector(height)),
+                                     NSStringFromSelector(@selector(centerX)),
+                                     NSStringFromSelector(@selector(centerY)),
+                                     NSStringFromSelector(@selector(center))];
+    
+    [methods enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        SEL aSel = NSSelectorFromString(obj);
+       method_setImplementation(
+                                class_getInstanceMethod(ZXPAutoLayoutMaker.class,aSel),
+                                class_getMethodImplementation(ZXPAutoLayoutMaker.class, @selector(swizzleMethodForAttribute)));
+    }];
+    
+}
+
+#pragma mark - swizzle
+- (id)swizzleMethodForAttribute {
+    
+    NSString *methodName = NSStringFromSelector(_cmd);
+    if ([methodName isEqualToString:@"center"]) {
+        return self.centerX.centerY;
+    }
+    
+    //remove tempRelatedConstraints
+    [self.tempRelatedConstraints removeAllObjects];
+    
+    //get data for attributes
+    NSDictionary *attributeData = objc_getAssociatedObject([self class], @selector(swizzleMethodForAttribute));
+    NSMutableArray<NSString *> *layoutAttributeStringList = attributeData[@"keys"];
+    NSMutableArray<NSNumber *> *layoutAttributeValueList = attributeData[@"values"];
+    
+    //get attribute for this
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"self endswith[c] %@",methodName];
+    NSString *layoutAttributeString = [layoutAttributeStringList filteredArrayUsingPredicate:predicate].firstObject;
+    NSUInteger index = [layoutAttributeStringList indexOfObject:layoutAttributeString];
+    
+    //add constraints attribute
+    [self.constraintAttributes addObject:layoutAttributeValueList[index]];
+    
+    return self;
+}
+
+#pragma mark - public
+
 - (instancetype)initWithView:(UIView *)view type:(id)type {
     
     if (self = [super init]) {
@@ -50,73 +122,6 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
         self.view.translatesAutoresizingMaskIntoConstraints = NO;
     }
     
-    return self;
-}
-
-- (ZXPAutoLayoutMaker *)top {
-    [self.tempRelatedConstraints removeAllObjects];
-    [self.constraintAttributes addObject:@(NSLayoutAttributeTop)];
-    return self;
-}
-
-- (ZXPAutoLayoutMaker *)left {
-    [self.tempRelatedConstraints removeAllObjects];
-    [self.constraintAttributes addObject:@(NSLayoutAttributeLeft)];
-    return self;
-}
-
-- (ZXPAutoLayoutMaker *)bottom {
-    [self.tempRelatedConstraints removeAllObjects];
-    [self.constraintAttributes addObject:@(NSLayoutAttributeBottom)];
-    return self;
-}
-
-- (ZXPAutoLayoutMaker *)right {
-    [self.tempRelatedConstraints removeAllObjects];
-    [self.constraintAttributes addObject:@(NSLayoutAttributeRight)];
-    return self;
-}
-
-- (ZXPAutoLayoutMaker *)leading {
-    [self.tempRelatedConstraints removeAllObjects];
-    [self.constraintAttributes addObject:@(NSLayoutAttributeLeading)];
-    return self;
-}
-
-- (ZXPAutoLayoutMaker *)trailing {
-    [self.tempRelatedConstraints removeAllObjects];
-    [self.constraintAttributes addObject:@(NSLayoutAttributeTrailing)];
-    return self;
-}
-
-- (ZXPAutoLayoutMaker *)center {
-    [self.tempRelatedConstraints removeAllObjects];
-    [self.constraintAttributes addObject:@(NSLayoutAttributeCenterX)];
-    [self.constraintAttributes addObject:@(NSLayoutAttributeCenterY)];
-    return self;
-}
-
-- (ZXPAutoLayoutMaker *)centerX {
-    [self.tempRelatedConstraints removeAllObjects];
-    [self.constraintAttributes addObject:@(NSLayoutAttributeCenterX)];
-    return self;
-}
-
-- (ZXPAutoLayoutMaker *)centerY {
-    [self.tempRelatedConstraints removeAllObjects];
-    [self.constraintAttributes addObject:@(NSLayoutAttributeCenterY)];
-    return self;
-}
-
-- (ZXPAutoLayoutMaker *)width {
-    [self.tempRelatedConstraints removeAllObjects];
-    [self.constraintAttributes addObject:@(NSLayoutAttributeWidth)];
-    return self;
-}
-
-- (ZXPAutoLayoutMaker *)height {
-    [self.tempRelatedConstraints removeAllObjects];
-    [self.constraintAttributes addObject:@(NSLayoutAttributeHeight)];
     return self;
 }
 
@@ -476,36 +481,30 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
     [array addObjectsFromArray:superConstrain];
     [array enumerateObjectsUsingBlock:^(__kindof NSLayoutConstraint * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if (obj.firstItem == self) {
-            NSLog(@"%@:%f",layoutAttributeString(obj.firstAttribute),obj.constant);
+            NSLog(@"%@ -> %@ : %f",[self class],layoutAttributeString(obj.firstAttribute),obj.constant);
         }
     }];
 }
 
 NSString* layoutAttributeString(NSLayoutAttribute attribute) {
+    NSString *attributeString;
+#define enumToString(value) case value : attributeString = @#value; break;
     switch (attribute) {
-        case NSLayoutAttributeLeft:
-            return @"left";
-        case NSLayoutAttributeRight:
-            return @"right";
-        case NSLayoutAttributeTop:
-            return @"top";
-        case NSLayoutAttributeBottom:
-            return @"bottom";
-        case NSLayoutAttributeLeading:
-            return @"leading";
-        case NSLayoutAttributeTrailing:
-            return @"trailing";
-        case NSLayoutAttributeWidth:
-            return @"width";
-        case NSLayoutAttributeHeight:
-            return @"height";
-        case NSLayoutAttributeCenterX:
-            return @"centerX";
-        case NSLayoutAttributeCenterY:
-            return @"centerY";
+            enumToString(NSLayoutAttributeLeft)
+            enumToString(NSLayoutAttributeRight)
+            enumToString(NSLayoutAttributeTop)
+            enumToString(NSLayoutAttributeBottom)
+            enumToString(NSLayoutAttributeLeading)
+            enumToString(NSLayoutAttributeTrailing)
+            enumToString(NSLayoutAttributeWidth)
+            enumToString(NSLayoutAttributeHeight)
+            enumToString(NSLayoutAttributeCenterX)
+            enumToString(NSLayoutAttributeCenterY)
         default:
-            return @"not attribute";
+            enumToString(NSLayoutAttributeNotAnAttribute)
     }
+#undef enumToString
+    return attributeString;
 }
 
 @end

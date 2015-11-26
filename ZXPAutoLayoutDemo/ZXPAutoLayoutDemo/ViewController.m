@@ -24,34 +24,42 @@
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     
-    UIView *view = [UIView new];
-    [self.view addSubview:view];
-    view.backgroundColor = [UIColor redColor];
-    [view zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
-        layout.edges.equalTo(self.view); //上下左右边距等于self.view
+    //------------- 简单使用示例的用法 --------------
+    
+    UIView *redView = [UIView new];
+    [self.view addSubview:redView];
+    redView.backgroundColor = [UIColor redColor];
+    [redView zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
+        layout.edges.equalTo(self.view); //上 下 左 右 边距 距离self.view都为0,也就是和superview的坐标,宽高保持一致
     }];
-    [view zxp_printConstraintsForSelf];
     
     UIView *blueView = [UIView new];
-    [view addSubview:blueView];
+    [redView addSubview:blueView];
     blueView.backgroundColor = [UIColor blueColor];
     [blueView zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
-        layout.top.left.offset(20);
-        layout.width.height.offset(100);
+        layout.top.left.offset(20); //上边距和左边距都距离superview 为20的距离
+        layout.width.height.offset(100); //宽高等于100
     }];
-    NSLog(@"blueView:");
-    [blueView zxp_printConstraintsForSelf];
+    NSLog(@"blueView的约束:");
+    [blueView zxp_printConstraintsForSelf]; //打印当前view的约束
     
     UIView *grayView = [UIView new];
     [self.view addSubview:grayView];
     grayView.backgroundColor = [UIColor grayColor];
     [grayView zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
         layout.top.equalTo(blueView.zxp_bottom).offset(10);//在blueview的下边并加10的距离
-        layout.left.offset(20);
+        layout.left.offset(20); //距离superview左间距20
         layout.height.equalTo(blueView); //高度和blueview一样
         layout.width.equalTo(blueView).multiplier(0.5);//是blueview宽度的一半
     }];
     
+    UIView *greenView = [UIView new];
+    [self.view addSubview:greenView];
+    greenView.backgroundColor = [UIColor greenColor];
+    [greenView zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
+        layout.width.height.offset(100); //宽高等于100
+        layout.center.equalTo(self.view); //在self.view里保持居中
+    }];
 }
 
 - (void)didReceiveMemoryWarning {
