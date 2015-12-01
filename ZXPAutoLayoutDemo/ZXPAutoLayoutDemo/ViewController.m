@@ -2,6 +2,16 @@
 //  ViewController.m
 //  ZXPAutoLayoutDemo
 //
+/*
+ 
+ version : 0.3.3
+ support : Xcode7.0以上 , iOS 7 以上
+ 简洁方便的autolayout,有任何问题欢迎issue 我
+ github : https://github.com/biggercoffee/ZXPAutolayout
+ csdn blog : http://blog.csdn.net/biggercoffee
+ QQ : 974792506
+ 
+ */
 //  Created by coffee on 15/11/14.
 //  Copyright © 2015年 coffee. All rights reserved.
 //
@@ -59,6 +69,20 @@
     [greenView zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
         layout.width.height.offset(100); //宽高等于100
         layout.center.equalTo(self.view); //在self.view里保持居中
+    }];
+    
+    //uilabel 自适应 , 第一步设置numberOfLines = 0;第二步设置高度大于等于1(或者更大的数值)即可
+    UILabel *label = [UILabel new];
+    [self.view addSubview:label];
+    label.backgroundColor = [UIColor blackColor];
+    label.textColor = [UIColor whiteColor];
+    label.text = @"1.this is a test 2.this is a test 3.this is a test 4.this is a test";
+    label.numberOfLines = 0; //----自适应第一步, numberoflines = 0
+    [label zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
+        layout.top.offset(200); //距离父视图的顶部距离为200
+        layout.left.offset(20); //距离父视图的左侧距离为20
+        layout.width.equalToWithMultiplier(self.view,0.5); //设置宽度为self.view的宽度的0.5(比例)
+        layout.height.greaterThanOrEqual(@1); //-----自适应第二步,设置高度大于等于1即可
     }];
 }
 
