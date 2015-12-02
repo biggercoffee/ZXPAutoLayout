@@ -1,6 +1,6 @@
 # ZXPAutoLayout
 ## 方便简洁的ios自动布局
-## 此处简单入门但也足以, 如需深入一点了解, 可以查看这篇博文, 详细讲解了ZXPAutoLayout的使用 : [http://blog.csdn.net/biggercoffee/article/details/50136839#t11](http://blog.csdn.net/biggercoffee/article/details/50136839#t11)
+## 此处简单入门但也足以, 如需深入一点了解, 可以查看这篇博文, 详细讲解了ZXPAutoLayout的使用 : [http://blog.csdn.net/biggercoffee/article/details/50136839](http://blog.csdn.net/biggercoffee/article/details/50136839)
 #### 传统的自动布局添加一个约束(用代码实现) ####
 
 <pre><code> NSLayoutConstraint *constraintX = [NSLayoutConstraint constraintWithItem:view1 //要添加的约束
