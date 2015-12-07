@@ -10,25 +10,82 @@
 
 #import <objc/runtime.h>
 
+static NSString * const ZXPAutoLayoutMakerAdd = @"ZXPAutoLayoutMakerAdd-zxp";
+static NSString * const ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate-zxp";
+static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
+
+#pragma mark - private category of array
+
 @interface NSArray (ZXPPrivateOfAutoLayout)
 
 - (NSArray *)distinctUnionOfObjects;
 
 @end
 
-static NSString * const ZXPAutoLayoutMakerAdd = @"ZXPAutoLayoutMakerAdd";
-static NSString * const ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate";
-static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
+@implementation NSArray (ZXPPrivateOfAutoLayout)
+
+- (NSArray *)distinctUnionOfObjects {
+    return [self valueForKeyPath:@"@distinctUnionOfObjects.self"];
+}
+
+@end
+
+#pragma mark - ZXPStackView class
+
+@implementation ZXPStackView
+
+- (void)layoutWithType:(ZXPStackViewType)type {
+    NSInteger subviewCount = self.subviews.count;
+    
+    [self.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        
+        [obj zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
+            if (type == ZXPStackViewTypeHorizontal) { //水平
+                if (!idx) {
+                    layout.leftSpace(self.padding.left);
+                }
+                else {
+                    layout.leftSpaceByView(self.subviews[idx - 1],self.space);
+                }
+                if (subviewCount - 1 == idx) {
+                    layout.rightSpace(self.padding.right);
+                }
+                else {
+                    layout.widthEqualTo(self.subviews[idx + 1],0);
+                }
+                layout.topSpace(self.padding.top);
+                layout.bottomSpace(self.padding.bottom);
+            }
+            else { //垂直
+                if (!idx) {
+                    layout.topSpace(self.padding.top);
+                }
+                else {
+                    layout.topSpaceByView(self.subviews[idx - 1],self.space);
+                }
+                
+                if (subviewCount - 1 == idx) {
+                    layout.bottomSpace(self.padding.bottom);
+                }
+                else {
+                    layout.heightEqualTo(self.subviews[idx + 1],0);
+                }
+                layout.leftSpace(self.padding.left);
+                layout.rightSpace(self.padding.right);
+            }
+        }];
+    }];
+    
+}
+
+@end
+
+#pragma mark - ZXPAutoLayoutMaker class
 
 @interface ZXPAutoLayoutMaker ()
 
 @property (nonatomic,strong) NSMutableArray *constraintAttributes;
 
-/**
- *  @author coffee
- *
- *  temp save constraints for RelativeLayout (centerX,centerY,equal), do not save constraints for top,left,bottom,right,width,height
- */
 @property (nonatomic,strong) NSMutableArray<NSLayoutConstraint *> *tempRelatedConstraints;
 
 @property (nonatomic,strong) UIView *view;
@@ -41,6 +98,7 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
 
 + (void)load {
     
+    //-------- 已废弃, 保留1.0之前的api实现 --------
     NSMutableArray<NSString *> *layoutAttributeStringList = [NSMutableArray array];
     NSMutableArray<NSNumber *> *layoutAttributeValueList = [NSMutableArray array];
 #define enumToString(value) [layoutAttributeStringList addObject:@#value]; \
@@ -78,10 +136,17 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
                                 class_getInstanceMethod(ZXPAutoLayoutMaker.class,aSel),
                                 class_getMethodImplementation(ZXPAutoLayoutMaker.class, @selector(swizzleMethodForAttribute)));
     }];
-    
+    //---------- 以上是已废弃的代码, 保留1.0之前的api实现 --------------
 }
 
 #pragma mark - swizzle
+/**
+ *  @author coffee
+ *
+ *  @brief 已废弃,保留1.0之前的api接口实现
+ *
+ *  @return self
+ */
 - (id)swizzleMethodForAttribute {
     
     NSString *methodName = NSStringFromSelector(_cmd);
@@ -124,6 +189,194 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
     
     return self;
 }
+
+#pragma mark 设置在superview里的距离
+
+- (ZXPAutoLayoutMaker *(^)(CGFloat))topSpace {
+    return ^(CGFloat value) {
+        return [self addOrUpdateSpaceInSuperview:NSLayoutAttributeTop constant:value];
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(CGFloat))leftSpace {
+    return ^(CGFloat value) {
+        return [self addOrUpdateSpaceInSuperview:NSLayoutAttributeLeft constant:value];
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(CGFloat))bottomSpace {
+    return ^(CGFloat value) {
+        return [self addOrUpdateSpaceInSuperview:NSLayoutAttributeBottom constant:value];
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(CGFloat))rightSpace {
+    return ^(CGFloat value) {
+        return [self addOrUpdateSpaceInSuperview:NSLayoutAttributeRight constant:value];
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(UIEdgeInsets))edgeInsets {
+    return ^(UIEdgeInsets edge) {
+        return self.topSpace(edge.top).leftSpace(edge.left).bottomSpace(edge.bottom).rightSpace(edge.right);
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(UIView *))edgeEqualTo {
+    return ^(UIView *view) {
+        return self.topSpaceEqualTo(view,0).leftSpaceEqualTo(view,0).bottomSpaceEqualTo(view,0).rightSpaceEqualTo(view,0);
+    };
+}
+
+#pragma mark 居中
+
+- (ZXPAutoLayoutMaker *(^)())xCenterInSuperview {
+    return ^() {
+        return self.xCenterByView(self.view.superview);
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)())yCenterInSuperview {
+    return ^() {
+        return self.yCenterByView(self.view.superview);
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)())centerInSuperview {
+    return ^() {
+        return self.centerByView(self.view.superview);
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(UIView *))xCenterByView {
+    return ^(UIView *view) {
+        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeCenterX multiplier:1 constant:0];
+        return self;
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(UIView *))yCenterByView {
+    return ^(UIView *view) {
+        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeCenterY multiplier:1 constant:0];
+        return self;
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(UIView *))centerByView {
+    return ^(UIView *view) {
+        return self.xCenterByView(view).yCenterByView(view);
+    };
+}
+
+#pragma mark 设置距离其它view的间距
+/*
+    @param view  其它view
+    @param value 距离多少间距
+*/
+
+- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))topSpaceByView {
+    return ^(UIView *view,CGFloat value) {
+        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeBottom multiplier:1 constant:value];
+        return self;
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))leftSpaceByView {
+    return ^(UIView *view,CGFloat value) {
+        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeRight multiplier:1 constant:value];
+        return self;
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))bottomSpaceByView {
+    return ^(UIView *view,CGFloat value) {
+        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeTop multiplier:1 constant:value];
+        return self;
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))rightSpaceByView {
+    return ^(UIView *view,CGFloat value) {
+        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeLeft multiplier:1 constant:value];
+        return self;
+    };
+}
+
+#pragma mark 设置距离与其他view相等
+
+- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))topSpaceEqualTo {
+    return ^(UIView *view,CGFloat value) {
+        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeTop multiplier:1 constant:value];
+        return self;
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))leftSpaceEqualTo {
+    return ^(UIView *view,CGFloat value) {
+        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeLeft multiplier:1 constant:value];
+        return self;
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))bottomSpaceEqualTo {
+    return ^(UIView *view,CGFloat value) {
+        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeBottom multiplier:1 constant:value];
+        return self;
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))rightSpaceEqualTo {
+    return ^(UIView *view,CGFloat value) {
+        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeRight multiplier:1 constant:value];
+        return self;
+    };
+}
+
+#pragma mark 设置宽高
+
+- (ZXPAutoLayoutMaker *(^)(CGFloat))widthValue {
+    return ^(CGFloat value) {
+        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual secondView:nil secondAttribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:value];
+        return self;
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(CGFloat))heightValue {
+    return ^(CGFloat value) {
+        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual secondView:nil secondAttribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:value];
+        return self;
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(UIView *,CGFloat))widthEqualTo {
+    return ^(UIView *view,CGFloat value) {
+        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeWidth multiplier:1 constant:value];
+        return self;
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(UIView *,CGFloat))heightEqualTo {
+    return ^(UIView *view,CGFloat value) {
+        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeHeight multiplier:1 constant:value];
+        return self;
+    };
+}
+
+#pragma mark 自适应高度
+
+- (ZXPAutoLayoutMaker *(^)())autoHeight {
+    return ^() {
+        if ([self.view isKindOfClass:[UILabel class]]) {
+            UILabel *label = (UILabel *) self.view;
+            label.numberOfLines = 0;
+        }
+        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationGreaterThanOrEqual secondView:nil secondAttribute:NSLayoutAttributeHeight multiplier:1 constant:1];
+        return self;
+    };
+}
+
+#pragma mark - deprecated public
+//--------以下方法都过期不推荐使用-------------
 
 - (ZXPAutoLayoutMaker *)with {
     [self.tempRelatedConstraints removeAllObjects];
@@ -195,7 +448,7 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
 
 - (ZXPAutoLayoutMaker *(^)(CGFloat))multiplier {
     return ^(CGFloat multiplier) {
-        if (self.lastConstraint) {            
+        if (self.lastConstraint) {
             [self.view.superview removeConstraint:self.lastConstraint];
             NSLayoutConstraint *obj = self.lastConstraint;
             [self.view.superview addConstraint:[NSLayoutConstraint constraintWithItem:obj.firstItem attribute:obj.firstAttribute relatedBy:obj.relation toItem:obj.secondItem attribute:obj.secondAttribute multiplier:multiplier constant:obj.constant]];
@@ -224,17 +477,79 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
 
 #pragma mark - private methods
 
+- (id)addOrUpdateSpaceInSuperview:(NSLayoutAttribute) attribute constant:(CGFloat)constant {
+    [self addOrUpdateConstraintWithFristView:self.view firstAttribute:attribute relatedBy:NSLayoutRelationEqual secondView:nil secondAttribute:attribute multiplier:1 constant:constant];
+    return self;
+}
+
 /**
  *  @author coffee
  *
- *  @brief  添加约束如果存在则会先删除在添加
+ *  @brief 添加or更新 约束
  *
- *  @param value      view or nsnumber
- *  @param relateBy   NSLayoutRelation 属性
- *  @param multiplier 比例
- *
- *  @return self
+ *  @param firstView       第一个view
+ *  @param firstAttribute  第一个view的属性
+ *  @param relation        关系(等于,大于等于,小于等于)
+ *  @param secondView      第二个view
+ *  @param secondAttribute 第二个view的属性
+ *  @param multiplier      比例 ( 0 -- 1 )
+ *  @param constant        约束的值
  */
+- (void)addOrUpdateConstraintWithFristView:(UIView *)firstView firstAttribute:(NSLayoutAttribute)firstAttribute relatedBy:(NSLayoutRelation)relation secondView:(UIView *)secondView secondAttribute:(NSLayoutAttribute)secondAttribute multiplier:(CGFloat)multiplier constant:(CGFloat)constant {
+    
+    if (self.layoutType == ZXPAutoLayoutMakerAdd) {
+        [self addConstraintWithFristView:firstView firstAttribute:firstAttribute relatedBy:relation secondView:secondView secondAttribute:secondAttribute multiplier:multiplier constant:constant];
+    }
+    else { //update
+        
+        if (secondView) {
+            [self.view.superview.constraints enumerateObjectsUsingBlock:^(__kindof NSLayoutConstraint * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                
+                if (obj.firstItem == self.view && obj.firstAttribute == firstAttribute) {
+                    [self.view.superview removeConstraint:obj]; //remove
+                }
+                
+            }];
+            [self addConstraintWithFristView:firstView firstAttribute:firstAttribute relatedBy:relation secondView:secondView secondAttribute:secondAttribute multiplier:multiplier constant:constant];
+        }
+        else {
+            [self updateConstraintWithFirstView:self.view firstAttribute:firstAttribute constant:constant];
+        }
+    }
+
+}
+
+- (void)addConstraintWithFristView:(UIView *)firstView firstAttribute:(NSLayoutAttribute)firstAttribute relatedBy:(NSLayoutRelation)relation secondView:(UIView *)secondView secondAttribute:(NSLayoutAttribute)secondAttribute multiplier:(CGFloat)multiplier constant:(CGFloat)constant {
+    id view = nil;
+    id toItem = nil;
+    CGFloat value = firstAttribute == NSLayoutAttributeBottom || firstAttribute == NSLayoutAttributeRight ? 0.0 - constant : constant;
+    
+    if (firstAttribute == NSLayoutAttributeWidth || firstAttribute == NSLayoutAttributeHeight) {
+        if (secondView) {
+            view = firstView.superview;
+            toItem = secondView?:firstView.superview;
+        }
+        else {
+            view = firstView;
+        }
+    }
+    else {
+        view = firstView.superview;
+        toItem = secondView?:firstView.superview;
+    }
+    NSLayoutConstraint *constraint = [NSLayoutConstraint constraintWithItem:firstView
+                                                                  attribute:firstAttribute
+                                                                  relatedBy:relation
+                                                                     toItem:toItem
+                                                                  attribute:secondAttribute
+                                                                 multiplier:multiplier
+                                                                   constant:value];
+    self.lastConstraint = constraint;
+    [view addConstraint:constraint];
+}
+
+#pragma mark - deprecated private methods , 保留1.0之前的api所使用的私有方法.
+
 - (id)reAddConstraint:(id)value relatedBy:(NSLayoutRelation)relateBy multiplier:(CGFloat)multiplier {
     if ([value isKindOfClass:[NSNumber class]]) {
         return [self setupConstraint:[value floatValue] relatedBy:relateBy multiplierBy:multiplier];
@@ -246,17 +561,6 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
     return self;
 }
 
-/**
- *  @author coffee
- *
- *  @brief  设置约束值,如果tempRelatedConstraints不为空就更新tempRelatedConstraints里的约束(constant),否则就添加约束或者更新约束
- *
- *  @param offset     constant
- *  @param related    等于,小于等于,大于等于
- *  @param multiplier 比例
- *
- *  @return self
- */
 - (ZXPAutoLayoutMaker *)setupConstraint:(CGFloat)offset relatedBy:(NSLayoutRelation)related multiplierBy:(CGFloat)multiplier {
     
     if (!self.view.superview) {
@@ -318,18 +622,6 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
     return self;
 }
 
-/**
- *  @author coffee
- *
- *  @brief  根据数组(constraintAttributes变量)里保存的约束属性进行约束添加,如果约束存在则会先移除在进行添加
-            添加完约束之后会清空此数组(constraintAttributes变量) 并 重置第二个view的 NSLayoutAttribute 属性为 NSLayoutAttributeNotAnAttribute
- *
- *  @param secondView 第二个view
- *  @param related    等于,小于等于,大于等于
- *  @param multiplier 比例
- *
- *  @return 当前对象
- */
 - (ZXPAutoLayoutMaker *)reAddConstraintOfAttributesWithToItem:(UIView *)secondView relatedBy:(NSLayoutRelation)related multiplierBy:(CGFloat)multiplier {
     
     if (!self.view.superview) {
@@ -397,16 +689,6 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey~!";
         }
     }];
     
-}
-
-@end
-
-#pragma mark - private category of array
-
-@implementation NSArray (ZXPPrivateOfAutoLayout)
-
-- (NSArray *)distinctUnionOfObjects {
-    return [self valueForKeyPath:@"@distinctUnionOfObjects.self"];
 }
 
 @end
