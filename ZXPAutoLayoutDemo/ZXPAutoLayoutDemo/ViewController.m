@@ -19,6 +19,7 @@
 #import "ViewController.h"
 #import "ZXPAutoLayout.h"
 #import <objc/runtime.h>
+
 @interface ViewController ()
 
 @end
@@ -44,7 +45,7 @@
     //设置一个背景为半透明红色的view,上下左右四边都距离superview的距离为10
     UIView *bgView = [UIView new];
     [self.view addSubview:bgView];
-//    bgView.backgroundColor = [[UIColor redColor] colorWithAlphaComponent:.5];
+    bgView.backgroundColor = [[UIColor redColor] colorWithAlphaComponent:.5];
     [bgView zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
         //上下左右四边都距离superview的距离为10
         layout.edgeInsets(UIEdgeInsetsMake(10, 10, 10, 10));
@@ -134,7 +135,6 @@
         
         layout.autoHeight(); //自适应高度,只针对UILabel有效
     }];
-    label.text = @"这是文字自适应, 这是文字自适应 ,这是文字自适应 .这是文字自适应这是文字自适应 ,这是文字自适应 .这是文字自适应2";
     
     //等宽, 水平对齐 第一种方式
     {/*
@@ -174,11 +174,13 @@
     }
     
     //等宽, 水平对齐 第二种方式
-    //ZXPStackView 的使用
+    // ZXPStackView 的使用
     {
         ZXPStackView *stackView = [ZXPStackView new];
         [self.view addSubview:stackView];
         stackView.backgroundColor = [UIColor blackColor];
+        
+        //只需要设置stackView的宽高和位置即可
         [stackView zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
             layout.topSpaceByView(grayView,20);
             layout.leftSpace(0);
@@ -198,8 +200,11 @@
         [stackView addSubview:view3];
         view3.backgroundColor = [UIColor redColor];
         
+        //stack的内边距
         stackView.padding = UIEdgeInsetsMake(10, 10, 10,10);
+        //view直接的距离
         stackView.space = 10;
+        //调用此方法会给subviews自动添加约束条件,进行等宽或者等高排列
         [stackView layoutWithType:ZXPStackViewTypeHorizontal];
     }
 }

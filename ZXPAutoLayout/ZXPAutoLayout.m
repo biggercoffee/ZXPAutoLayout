@@ -56,7 +56,7 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
                 layout.topSpace(self.padding.top);
                 layout.bottomSpace(self.padding.bottom);
             }
-            else { //垂直
+            else if (type == ZXPStackViewTypeVertical) { //垂直
                 if (!idx) {
                     layout.topSpace(self.padding.top);
                 }
@@ -147,11 +147,11 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
  *
  *  @return self
  */
-- (id)swizzleMethodForAttribute {
+- (id)swizzleMethodForAttribute  __deprecated_msg("过期") {
     
     NSString *methodName = NSStringFromSelector(_cmd);
     if ([methodName isEqualToString:@"center"]) {
-        return self.centerX.centerY;
+        return self.centerByView(self.view.superview);
     }
     
     //remove tempRelatedConstraints
@@ -548,6 +548,18 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
     [view addConstraint:constraint];
 }
 
+- (void)updateConstraintWithFirstView:(UIView *)view firstAttribute:(NSLayoutAttribute)attribute constant:(CGFloat)constant {
+    
+    NSArray<__kindof NSLayoutConstraint *> *constraints = attribute == NSLayoutAttributeWidth || attribute == NSLayoutAttributeHeight ? view.constraints : view.superview.constraints;
+    [constraints enumerateObjectsUsingBlock:^(__kindof NSLayoutConstraint * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (obj.firstItem == view && obj.firstAttribute == attribute) {
+            obj.constant = constant;
+            *stop = YES;
+        }
+    }];
+    
+}
+
 #pragma mark - deprecated private methods , 保留1.0之前的api所使用的私有方法.
 
 - (id)reAddConstraint:(id)value relatedBy:(NSLayoutRelation)relateBy multiplier:(CGFloat)multiplier {
@@ -679,18 +691,6 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
     }
 }
 
-- (void)updateConstraintWithFirstView:(UIView *)view firstAttribute:(NSLayoutAttribute)attribute constant:(CGFloat)constant {
-    
-    NSArray<__kindof NSLayoutConstraint *> *constraints = attribute == NSLayoutAttributeWidth || attribute == NSLayoutAttributeHeight ? view.constraints : view.superview.constraints;
-    [constraints enumerateObjectsUsingBlock:^(__kindof NSLayoutConstraint * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if (obj.firstItem == view && obj.firstAttribute == attribute) {
-            obj.constant = constant;
-            *stop = YES;
-        }
-    }];
-    
-}
-
 @end
 
 #pragma mark - public category of view
@@ -790,3 +790,25 @@ NSString* layoutAttributeString(NSLayoutAttribute attribute) {
 }
 
 @end
+
+@implementation UITableViewCell (ZXPAutoHeight)
+
+- (CGFloat)zxp_autoHeight {
+    [self layoutIfNeeded];
+    method_exchangeImplementations(class_getInstanceMethod([self class], @selector(tableView:heightForRowAtIndexPath:)), class_getInstanceMethod([self class], @selector(newtableView:heightForRowAtIndexPath:)));
+    NSLog(@"%@",[self valueForKey:@"_tableView"]);
+
+    return 40;
+}
+
+- (CGFloat)newtableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    NSLog(@"%@",tableView);
+    return 100;
+}
+
+@end
+
+
+
+
+

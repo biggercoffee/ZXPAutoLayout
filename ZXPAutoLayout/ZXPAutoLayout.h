@@ -6,7 +6,7 @@
     version : 1.0.0
     support : Xcode7.0以上 , iOS 7 以上
     简洁方便的autolayout, 打造天朝最优, 最简洁方便, 最容易上手的autolayout
-    有任何问题或者需要改善交流的 可在博客或者github里给我提问题也可以联系我本人QQ
+    有任何问题或者需要改善交流的 可在 csdn博客或者github里给我提问题也可以联系我本人QQ
     github : https://github.com/biggercoffee/ZXPAutolayout
     csdn blog : http://blog.csdn.net/biggercoffee
     QQ : 974792506
@@ -155,44 +155,44 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 
 // ---------------- 以下是1.0以前的布局方式, 不推荐使用 -------------------
 
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *top; /**< 上边距 */
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *left; /**< 左边距 */
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *bottom; /**< 下边距 */
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *right; /**< 右边距 */
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *leading;
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *trailing;
+@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *top __deprecated_msg("use topSpace"); /**< 上边距 */
+@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *left __deprecated_msg("use leftSpace"); /**< 左边距 */
+@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *bottom __deprecated_msg("use bottomSpace"); /**< 下边距 */
+@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *right __deprecated_msg("use rightSpace"); /**< 右边距 */
+@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *leading __deprecated_msg("use leftSpace");
+@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *trailing __deprecated_msg("use rightSpace");
 
 //居中
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *center;
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *centerX;
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *centerY;
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *center __deprecated_msg("use centerByView");
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *centerX __deprecated_msg("use xCenterByView");
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *centerY __deprecated_msg("use yCenterByView");
 
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *width; /**< 宽度 */
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *height; /**< 高度 */
+@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *width __deprecated_msg("use widthValue"); /**< 宽度 */
+@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *height __deprecated_msg("use heightValue"); /**< 高度 */
 
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *edges; /**< add top,left,bottom, right */
+@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *edges __deprecated_msg("use edgeInsets"); /**< add top,left,bottom, right */
 
-@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *with;
+@property (strong, nonatomic, readonly) ZXPAutoLayoutMaker *with __deprecated_msg("不推荐使用");
 
 //---- setting constraints
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^offset)(CGFloat offset); /**< setting constant */
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^equalTo)(id value); /**< 如果是nsnumber类型就设置约束的值 , 如果是uiview类型就设置为相等于另一个view的约束 */
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^sizeOffset)(CGSize size); /**< setting width,height */
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^originOffset)(CGPoint origin); /**< setting top,left */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^offset)(CGFloat offset) __deprecated_msg("不推荐使用"); /**< setting constant */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^equalTo)(id value) __deprecated_msg("不推荐使用"); /**< 如果是nsnumber类型就设置约束的值 , 如果是uiview类型就设置为相等于另一个view的约束 */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^sizeOffset)(CGSize size) __deprecated_msg("不推荐使用"); /**< setting width,height */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^originOffset)(CGPoint origin) __deprecated_msg("不推荐使用"); /**< setting top,left */
 
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^frameOffset)(CGRect frame);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^frameOffset)(CGRect frame) __deprecated_msg("不推荐使用");
 
-@property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^insets)(UIEdgeInsets insets);
+@property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^insets)(UIEdgeInsets insets) __deprecated_msg("不推荐使用");
 
 //大于等于,小于等于
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^greaterThanOrEqual)(id value); /**< 大于等于 */
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^lessThanOrEqual)(id value); /**< 小于等于 */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^greaterThanOrEqual)(id value) __deprecated_msg("不推荐使用"); /**< 大于等于 */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^lessThanOrEqual)(id value) __deprecated_msg("不推荐使用"); /**< 小于等于 */
 
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^equalToWithMultiplier)(id value,CGFloat multiplier);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^equalToWithMultiplier)(id value,CGFloat multiplier) __deprecated_msg("不推荐使用");
 
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^greaterThanOrEqualWithMultiplier)(id value,CGFloat multiplier);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^greaterThanOrEqualWithMultiplier)(id value,CGFloat multiplier) __deprecated_msg("不推荐使用");
 
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^lessThanOrEqualWithMultiplier)(id value,CGFloat multiplier);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^lessThanOrEqualWithMultiplier)(id value,CGFloat multiplier) __deprecated_msg("不推荐使用");
 
 @end
 
@@ -201,16 +201,16 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 @interface UIView (ZXPAdditions)
 
 //attributes
-@property (nonatomic,strong,readonly) id zxp_top;
-@property (nonatomic,strong,readonly) id zxp_left;
-@property (nonatomic,strong,readonly) id zxp_bottom;
-@property (nonatomic,strong,readonly) id zxp_right;
-@property (nonatomic,strong,readonly) id zxp_leading;
-@property (nonatomic,strong,readonly) id zxp_trailing;
-@property (nonatomic,strong,readonly) id zxp_width;
-@property (nonatomic,strong,readonly) id zxp_height;
-@property (nonatomic,strong,readonly) id zxp_centerX;
-@property (nonatomic,strong,readonly) id zxp_centerY;
+@property (nonatomic,strong,readonly) id zxp_top __deprecated_msg("不推荐使用");
+@property (nonatomic,strong,readonly) id zxp_left __deprecated_msg("不推荐使用");
+@property (nonatomic,strong,readonly) id zxp_bottom __deprecated_msg("不推荐使用");
+@property (nonatomic,strong,readonly) id zxp_right __deprecated_msg("不推荐使用");
+@property (nonatomic,strong,readonly) id zxp_leading __deprecated_msg("不推荐使用");
+@property (nonatomic,strong,readonly) id zxp_trailing __deprecated_msg("不推荐使用");
+@property (nonatomic,strong,readonly) id zxp_width __deprecated_msg("不推荐使用");
+@property (nonatomic,strong,readonly) id zxp_height __deprecated_msg("不推荐使用");
+@property (nonatomic,strong,readonly) id zxp_centerX __deprecated_msg("不推荐使用");
+@property (nonatomic,strong,readonly) id zxp_centerY __deprecated_msg("不推荐使用");
 
 //add
 - (void)zxp_addConstraints:(void(^)(ZXPAutoLayoutMaker *layout))layout;
@@ -222,6 +222,11 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 - (void)zxp_printConstraintsForSelf;
 
 @end
+
+@interface UITableViewCell (ZXPAutoHeight)
+- (CGFloat)zxp_autoHeight;
+@end
+
 
 
 
