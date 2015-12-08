@@ -22,7 +22,7 @@
 > </code></pre>
 >**<font size=4> 就这样随便加一个约束就如此的繁琐,更何况一个view最起码有上边距,左边距和宽高,也就是所谓的`x,y,width,height`四个基本属性.就相当于以上那复杂的代 码就要最少写四次.** </font>
 
-><font size=4>  **而现在用<font color=red size=5>`ZXPAutoLayout`</font>来给一个view添加上边距,左边距,宽高.** </font>
+<font size=4>  **而现在用<font color=red size=5>`ZXPAutoLayout`</font>来给一个view添加上边距,左边距,宽高.** </font>
 ```objctive-c
 //设置一个背景为半透明红色的view,上下左右四边都距离superview的距离为10
     UIView *bgView = [UIView new];
@@ -38,10 +38,10 @@
 ```
 </p>
 </p>
-# 加入ZXPAutoLayout !
-> ###  第一种方式:直接去github上下载:[https://github.com/biggercoffee/ZXPAutoLayout](https://github.com/biggercoffee/ZXPAutoLayout)
+# 加入ZXPAutoLayout !
+###  第一种方式:直接去github上下载:[https://github.com/biggercoffee/ZXPAutoLayout](https://github.com/biggercoffee/ZXPAutoLayout)
 <p></p>
-> ### 第二种方式: 直接在Cocoapods里搜索ZXPAutoLayout <font color=brown>(不知道什么是cocoapods或者使用方法者请自行百度, Google, 网上一大堆资料). </font>搜索命令:  `pod search zxpautolayout` 然后在安装到你的cocoapods里.  <p></p><font color=red>注意:有些用Cocoapods搜索出来的版本不是最新或者无法搜索到的, 请升级一下cocoapods即可</font>
+### 第二种方式: 直接在Cocoapods里搜索ZXPAutoLayout <font color=brown>(不知道什么是cocoapods或者使用方法者请自行百度, Google, 网上一大堆资料). </font>搜索命令:  `pod search zxpautolayout` 然后在安装到你的cocoapods里.  <p></p><font color=red>注意:有些用Cocoapods搜索出来的版本不是最新或者无法搜索到的, 请升级一下cocoapods即可</font>
 
 #如何使用它?
 <font size=4>**在需要的地方导入`ZXPAutoLayout.h`头文件即可**</font>
