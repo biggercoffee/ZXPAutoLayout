@@ -223,9 +223,6 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 
 @end
 
-@interface UITableViewCell (ZXPAutoHeight)
-- (CGFloat)zxp_autoHeight;
-@end
 
 
 

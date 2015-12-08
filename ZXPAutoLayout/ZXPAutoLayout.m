@@ -791,22 +791,6 @@ NSString* layoutAttributeString(NSLayoutAttribute attribute) {
 
 @end
 
-@implementation UITableViewCell (ZXPAutoHeight)
-
-- (CGFloat)zxp_autoHeight {
-    [self layoutIfNeeded];
-    method_exchangeImplementations(class_getInstanceMethod([self class], @selector(tableView:heightForRowAtIndexPath:)), class_getInstanceMethod([self class], @selector(newtableView:heightForRowAtIndexPath:)));
-    NSLog(@"%@",[self valueForKey:@"_tableView"]);
-
-    return 40;
-}
-
-- (CGFloat)newtableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    NSLog(@"%@",tableView);
-    return 100;
-}
-
-@end
 
 
 
