@@ -552,9 +552,24 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
     
     NSArray<__kindof NSLayoutConstraint *> *constraints = attribute == NSLayoutAttributeWidth || attribute == NSLayoutAttributeHeight ? view.constraints : view.superview.constraints;
     [constraints enumerateObjectsUsingBlock:^(__kindof NSLayoutConstraint * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if (obj.firstItem == view && obj.firstAttribute == attribute) {
-            obj.constant = constant;
-            *stop = YES;
+        
+        if (attribute == NSLayoutAttributeLeft) {
+            if (obj.firstItem == self.view && (obj.firstAttribute == attribute || obj.firstAttribute == NSLayoutAttributeLeading)) {
+                obj.constant = constant;
+                *stop = YES;
+            }
+        }
+        else if (attribute == NSLayoutAttributeRight) {
+            if (obj.firstItem == self.view && (obj.firstAttribute == attribute || obj.firstAttribute == NSLayoutAttributeTrailing)) {
+                obj.constant = constant;
+                *stop = YES;
+            }
+        }
+        else {
+            if (obj.firstItem == view && obj.firstAttribute == attribute) {
+                obj.constant = constant;
+                *stop = YES;
+            }
         }
     }];
     
