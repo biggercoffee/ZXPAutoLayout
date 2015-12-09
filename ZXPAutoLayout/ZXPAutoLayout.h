@@ -3,7 +3,7 @@
 //  layout
 /*
  
-    version : 1.0.0
+    version : 1.0.3
     support : Xcode7.0以上 , iOS 7 以上
     简洁方便的autolayout, 打造天朝最优, 最简洁方便, 最容易上手的autolayout
     有任何问题或者需要改善交流的 可在 csdn博客或者github里给我提问题也可以联系我本人QQ
@@ -134,6 +134,11 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
     根据文字自适应高度, 只针对UILabel控件生效.
  */
 @property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^autoHeight)();
+
+/**
+    根据文字自适应宽度, 只针对UILabel控件生效.
+ */
+@property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^autoWidth)();
 
 /**
  *  优先级

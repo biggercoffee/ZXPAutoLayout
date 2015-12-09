@@ -362,15 +362,26 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
     };
 }
 
-#pragma mark 自适应高度
+#pragma mark 自适应宽高
 
 - (ZXPAutoLayoutMaker *(^)())autoHeight {
     return ^() {
         if ([self.view isKindOfClass:[UILabel class]]) {
             UILabel *label = (UILabel *) self.view;
             label.numberOfLines = 0;
+            [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationGreaterThanOrEqual secondView:nil secondAttribute:NSLayoutAttributeHeight multiplier:1 constant:1];
         }
-        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationGreaterThanOrEqual secondView:nil secondAttribute:NSLayoutAttributeHeight multiplier:1 constant:1];
+        return self;
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)())autoWidth {
+    return ^() {
+        if ([self.view isKindOfClass:[UILabel class]]) {
+            UILabel *label = (UILabel *) self.view;
+            label.numberOfLines = 1;
+            [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationGreaterThanOrEqual secondView:nil secondAttribute:NSLayoutAttributeWidth multiplier:1 constant:1];
+        }
         return self;
     };
 }
