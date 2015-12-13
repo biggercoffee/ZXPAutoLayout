@@ -16,9 +16,29 @@
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="grf-TY-Ang">
+                                <rect key="frame" x="0.0" y="20" width="600" height="580"/>
+                                <animations/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="BYZ-38-t0r" id="N28-ao-Jpf"/>
+                                    <outlet property="delegate" destination="BYZ-38-t0r" id="DKs-9u-2Pr"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
                         <animations/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="grf-TY-Ang" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="3x8-6q-kI2"/>
+                            <constraint firstItem="grf-TY-Ang" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="4Yj-Ne-nWS"/>
+                            <constraint firstAttribute="trailing" secondItem="grf-TY-Ang" secondAttribute="trailing" id="qOU-ZS-LAs"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="grf-TY-Ang" secondAttribute="bottom" id="xD1-Wg-YRY"/>
+                        </constraints>
                     </view>
+                    <connections>
+                        <outlet property="tableView" destination="grf-TY-Ang" id="ShF-Of-Aul"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>

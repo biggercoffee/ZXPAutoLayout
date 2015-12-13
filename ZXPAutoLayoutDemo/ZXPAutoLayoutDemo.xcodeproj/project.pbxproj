@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1D72A4991C1D20F400A221AA /* SimpleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D72A4981C1D20F400A221AA /* SimpleViewController.m */; };
+		1D72A49F1C1DABB900A221AA /* ZXPStackViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D72A49E1C1DABB900A221AA /* ZXPStackViewController.m */; };
+		1D72A4A81C1DB4B700A221AA /* TableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D72A4A71C1DB4B700A221AA /* TableViewController.m */; };
+		1D72A4AC1C1DB72800A221AA /* TestTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D72A4AA1C1DB72800A221AA /* TestTableViewCell.m */; };
+		1D72A4AD1C1DB72800A221AA /* TestTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1D72A4AB1C1DB72800A221AA /* TestTableViewCell.xib */; };
+		1D72A4AF1C1DB93B00A221AA /* TableViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1D72A4AE1C1DB93B00A221AA /* TableViewController.xib */; };
 		1DD75F871BFB622800B4BEA9 /* ZXPAutoLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DD75F861BFB622800B4BEA9 /* ZXPAutoLayout.m */; };
 		1DFBBF321BF7096E00459D22 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DFBBF311BF7096E00459D22 /* main.m */; };
 		1DFBBF351BF7096E00459D22 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DFBBF341BF7096E00459D22 /* AppDelegate.m */; };
@@ -36,6 +42,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1D72A4971C1D20F400A221AA /* SimpleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimpleViewController.h; sourceTree = "<group>"; };
+		1D72A4981C1D20F400A221AA /* SimpleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SimpleViewController.m; sourceTree = "<group>"; };
+		1D72A49D1C1DABB900A221AA /* ZXPStackViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZXPStackViewController.h; sourceTree = "<group>"; };
+		1D72A49E1C1DABB900A221AA /* ZXPStackViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZXPStackViewController.m; sourceTree = "<group>"; };
+		1D72A4A61C1DB4B700A221AA /* TableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TableViewController.h; sourceTree = "<group>"; };
+		1D72A4A71C1DB4B700A221AA /* TableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TableViewController.m; sourceTree = "<group>"; };
+		1D72A4A91C1DB72800A221AA /* TestTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestTableViewCell.h; sourceTree = "<group>"; };
+		1D72A4AA1C1DB72800A221AA /* TestTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestTableViewCell.m; sourceTree = "<group>"; };
+		1D72A4AB1C1DB72800A221AA /* TestTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TestTableViewCell.xib; sourceTree = "<group>"; };
+		1D72A4AE1C1DB93B00A221AA /* TableViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TableViewController.xib; sourceTree = "<group>"; };
 		1DD75F851BFB622800B4BEA9 /* ZXPAutoLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZXPAutoLayout.h; sourceTree = "<group>"; };
 		1DD75F861BFB622800B4BEA9 /* ZXPAutoLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZXPAutoLayout.m; sourceTree = "<group>"; };
 		1DFBBF2D1BF7096E00459D22 /* ZXPAutoLayoutDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZXPAutoLayoutDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -81,6 +97,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1D72A4A01C1DADEC00A221AA /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				1D72A4A91C1DB72800A221AA /* TestTableViewCell.h */,
+				1D72A4AA1C1DB72800A221AA /* TestTableViewCell.m */,
+				1D72A4AB1C1DB72800A221AA /* TestTableViewCell.xib */,
+			);
+			name = Cells;
+			sourceTree = "<group>";
+		};
 		1DD75F841BFB622800B4BEA9 /* ZXPAutoLayout */ = {
 			isa = PBXGroup;
 			children = (
@@ -120,6 +146,14 @@
 				1DFBBF361BF7096E00459D22 /* ViewController.h */,
 				1DFBBF371BF7096E00459D22 /* ViewController.m */,
 				1DFBBF391BF7096E00459D22 /* Main.storyboard */,
+				1D72A4971C1D20F400A221AA /* SimpleViewController.h */,
+				1D72A4981C1D20F400A221AA /* SimpleViewController.m */,
+				1D72A49D1C1DABB900A221AA /* ZXPStackViewController.h */,
+				1D72A49E1C1DABB900A221AA /* ZXPStackViewController.m */,
+				1D72A4A61C1DB4B700A221AA /* TableViewController.h */,
+				1D72A4A71C1DB4B700A221AA /* TableViewController.m */,
+				1D72A4AE1C1DB93B00A221AA /* TableViewController.xib */,
+				1D72A4A01C1DADEC00A221AA /* Cells */,
 				1DFBBF3C1BF7096E00459D22 /* Assets.xcassets */,
 				1DFBBF3E1BF7096E00459D22 /* LaunchScreen.storyboard */,
 				1DFBBF411BF7096E00459D22 /* Info.plist */,
@@ -258,7 +292,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				1DFBBF401BF7096E00459D22 /* LaunchScreen.storyboard in Resources */,
+				1D72A4AD1C1DB72800A221AA /* TestTableViewCell.xib in Resources */,
 				1DFBBF3D1BF7096E00459D22 /* Assets.xcassets in Resources */,
+				1D72A4AF1C1DB93B00A221AA /* TableViewController.xib in Resources */,
 				1DFBBF3B1BF7096E00459D22 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -284,10 +320,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1D72A49F1C1DABB900A221AA /* ZXPStackViewController.m in Sources */,
+				1D72A4AC1C1DB72800A221AA /* TestTableViewCell.m in Sources */,
+				1D72A4991C1D20F400A221AA /* SimpleViewController.m in Sources */,
 				1DFBBF381BF7096E00459D22 /* ViewController.m in Sources */,
 				1DFBBF351BF7096E00459D22 /* AppDelegate.m in Sources */,
 				1DFBBF321BF7096E00459D22 /* main.m in Sources */,
 				1DD75F871BFB622800B4BEA9 /* ZXPAutoLayout.m in Sources */,
+				1D72A4A81C1DB4B700A221AA /* TableViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -366,10 +366,16 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
 
 - (ZXPAutoLayoutMaker *(^)())autoHeight {
     return ^() {
+        return self.autoHeightByMin(0);
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(CGFloat))autoHeightByMin {
+    return ^(CGFloat value) {
         if ([self.view isKindOfClass:[UILabel class]]) {
             UILabel *label = (UILabel *) self.view;
             label.numberOfLines = 0;
-            [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationGreaterThanOrEqual secondView:nil secondAttribute:NSLayoutAttributeHeight multiplier:1 constant:1];
+            [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationGreaterThanOrEqual secondView:nil secondAttribute:NSLayoutAttributeHeight multiplier:1 constant:value];
         }
         return self;
     };
@@ -377,10 +383,17 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
 
 - (ZXPAutoLayoutMaker *(^)())autoWidth {
     return ^() {
+        return self.autoWidthByMin(0);
+    };
+}
+
+- (ZXPAutoLayoutMaker *(^)(CGFloat))autoWidthByMin {
+    return ^(CGFloat value) {
         if ([self.view isKindOfClass:[UILabel class]]) {
             UILabel *label = (UILabel *) self.view;
-            label.numberOfLines = 1;
-            [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationGreaterThanOrEqual secondView:nil secondAttribute:NSLayoutAttributeWidth multiplier:1 constant:1];
+            NSInteger line = label.numberOfLines;
+            label.numberOfLines = line > 0 ? line : 1;
+            [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationGreaterThanOrEqual secondView:nil secondAttribute:NSLayoutAttributeWidth multiplier:1 constant:value];
         }
         return self;
     };
@@ -813,6 +826,69 @@ NSString* layoutAttributeString(NSLayoutAttribute attribute) {
     }
 #undef enumToString
     return attributeString;
+}
+
+@end
+
+#pragma mark - category UITableView + ZXPCellAutoHeight
+
+@implementation UITableView (ZXPCellAutoHeight)
+
+#pragma mark - category UITableView + ZXPCellAutoHeight -> public apis
+
+- (CGFloat)zxp_cellHeightWithIdentifier:(NSString *)identifier config:(void(^)(__kindof UITableViewCell *cell))block {
+    UITableViewCell *cell = [self cellWithIdentifier:identifier];
+    
+    if (!block) {
+        NSAssert(NO, @"block不能为空");
+    }
+    block(cell);
+    UIWindow *window = [[UIApplication sharedApplication].delegate window];
+    [window layoutIfNeeded];
+    [cell layoutIfNeeded];
+    
+    NSMutableArray *maxYArray = [NSMutableArray array];
+    [cell.contentView.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [maxYArray addObject:@(CGRectGetMaxY(obj.frame))];
+    }];
+    
+    NSArray *compareMaxYArray = [maxYArray sortedArrayUsingSelector:@selector(compare:)];
+    return [compareMaxYArray.lastObject floatValue];
+}
+
+- (CGFloat)zxp_cellHeightWithIdentifier:(NSString *)identifier config:(void(^)(__kindof UITableViewCell *cell))block space:(CGFloat)space {
+    return [self zxp_cellHeightWithIdentifier:identifier config:block] + space;
+}
+
+- (CGFloat)zxp_cellHeightWithIdentifier:(NSString *)identifier configAndReturnView:(UIView *(^)(__kindof UITableViewCell *cell))block {
+    UITableViewCell *cell = [self cellWithIdentifier:identifier];
+    
+    if (!block) {
+        NSAssert(NO, @"block不能为空");
+    }
+    UIView *view = block(cell);
+    UIWindow *window = [[UIApplication sharedApplication].delegate window];
+    [window layoutIfNeeded];
+    [cell layoutIfNeeded];
+    
+    return CGRectGetMaxY(view.frame);
+}
+
+- (CGFloat)zxp_cellHeightWithIdentifier:(NSString *)identifier configAndReturnView:(UIView *(^)(__kindof UITableViewCell *cell))block space:(CGFloat)space {
+    return [self zxp_cellHeightWithIdentifier:identifier configAndReturnView:block] + space;
+}
+
+#pragma mark - category UITableView + ZXPCellAutoHeight -> private
+
+- (UITableViewCell *)cellWithIdentifier:(NSString *)identifier {
+    UITableViewCell *cell = [self dequeueReusableCellWithIdentifier:identifier];
+    if (!cell) {
+        NSAssert(NO, @"请先调用tableview的 registerClass: forCellReuseIdentifier: 或者 registerNib: forCellReuseIdentifier: 方法来注册cell, identifier:%@",identifier);
+    }
+    CGRect cellFrame = cell.frame;
+    cellFrame.size.width = CGRectGetWidth(self.frame);
+    cell.frame = cellFrame;
+    return cell;
 }
 
 @end

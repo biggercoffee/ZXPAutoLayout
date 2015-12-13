@@ -3,14 +3,18 @@
 //  layout
 /*
  
-    version : 1.0.3
+ ***************** ***************** ***************** *****************
+ 
+    version : 1.1.0
     support : Xcode7.0以上 , iOS 7 以上
     简洁方便的autolayout, 打造天朝最优, 最简洁方便, 最容易上手的autolayout
     有任何问题或者需要改善交流的 可在 csdn博客或者github里给我提问题也可以联系我本人QQ
     github : https://github.com/biggercoffee/ZXPAutolayout
     csdn blog : http://blog.csdn.net/biggercoffee
     QQ : 974792506
+    Email: z_xiaoping@163.com
  
+  ***************** ***************** ***************** *****************
  */
 //  Created by coffee on 15/10/10.
 //  Copyright © 2015年 coffee. All rights reserved.
@@ -71,7 +75,7 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^edgeInsets)(UIEdgeInsets insets);
 
 /**
- *  设置在superview里的top,left,bottom,right与某一个view的top,left,bottom,right相等
+ *  top,left,bottom,right与某一个view的top,left,bottom,right相等
  */
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^edgeEqualTo)(UIView *view);
 
@@ -131,14 +135,24 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 @property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^heightValue)(CGFloat value);
 
 /**
-    根据文字自适应高度, 只针对UILabel控件生效.
+    根据文字自适应高度, 只针对UILabel控件生效. 最小值为0
  */
 @property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^autoHeight)();
 
 /**
-    根据文字自适应宽度, 只针对UILabel控件生效.
+    根据最小值进行文字自适应高度, 只针对UILabel控件生效.
+ */
+@property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^autoHeightByMin)(CGFloat value);
+
+/**
+    根据文字自适应宽度, 只针对UILabel控件生效. 最小值为0
  */
 @property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^autoWidth)();
+
+/**
+    根据最小值文字自适应宽度, 只针对UILabel控件生效.
+ */
+@property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^autoWidthByMin)(CGFloat value);
 
 /**
  *  优先级
@@ -225,6 +239,54 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 
 //print
 - (void)zxp_printConstraintsForSelf;
+
+@end
+
+#pragma mark - category UITableView + ZXPCellAutoHeight
+
+@interface UITableView (ZXPCellAutoHeight)
+
+/**
+ *  根据配置cell的数据返回cell里的contentview的第一层subviews里 Y + height 最大的数值
+ *
+ *  @param identifier cell的identifier
+ *  @param block      配置cell的数据block
+ *
+ *  @return cell里的contentview的第一层subviews里 Y + height 最大的数值
+ */
+- (CGFloat)zxp_cellHeightWithIdentifier:(NSString *)identifier config:(void(^)(__kindof UITableViewCell *cell))block;
+
+/**
+ *  根据配置cell的数据返回子控件距离上边最远的距离并加上space参数的值
+ *
+ *  @param identifier cell的identifier
+ *  @param block      配置cell的数据block
+ *  @param space      cell的高度 + space
+ *
+ *  @return cell的高度 + space
+ */
+- (CGFloat)zxp_cellHeightWithIdentifier:(NSString *)identifier config:(void(^)(__kindof UITableViewCell *cell))block space:(CGFloat)space;
+
+/**
+ *  根据配置cell的数据, 返回指定cell的某一个子view的 Y值+高度
+ *
+ *  @param identifier cell的identifier
+ *  @param block      配置cell的数据block, 并在block参数里返回指定的view
+ *
+ *  @return 返回指定cell的某一个子view的 Y值+高度. 比如在block参数里return cell.textLabel; 则就会返回textLabel这个控件的 Y + height
+ */
+- (CGFloat)zxp_cellHeightWithIdentifier:(NSString *)identifier configAndReturnView:(UIView *(^)(__kindof UITableViewCell *cell))block;
+
+/**
+ *  根据配置cell的数据, 返回指定cell的某一个子view的 Y值+高度
+ *
+ *  @param identifier cell的identifier
+ *  @param block      配置cell的数据block, 并在block参数里返回指定的view
+ *  @param space      cell的高度 + space
+ *
+ *  @return 返回指定cell的某一个子view的 Y值+高度. 比如在block参数里return cell.textLabel; 则就会返回textLabel这个控件的 Y + height + space
+ */
+- (CGFloat)zxp_cellHeightWithIdentifier:(NSString *)identifier configAndReturnView:(UIView *(^)(__kindof UITableViewCell *cell))block space:(CGFloat)space;
 
 @end
 
