@@ -1,7 +1,7 @@
 # ZXPAutoLayout
 ## 方便简洁的ios自动布局
 ## 此处简单入门但也足以, 如需深入一点了解, 可以查看这篇博文, 详细讲解了ZXPAutoLayout的使用 : [http://blog.csdn.net/biggercoffee/article/details/50136839](http://blog.csdn.net/biggercoffee/article/details/50136839)
-## v1.1.0版本已加入一行搞定`cell的自适应`,详情看demo或者这篇博文的api简介 : [http://blog.csdn.net/biggercoffee/article/details/50288253](http://blog.csdn.net/biggercoffee/article/details/50288253)
+## v1.1.0版本已加入一行搞定`cell的自适应高度`,详情看demo或者这篇博文的api简介 : [http://blog.csdn.net/biggercoffee/article/details/50288253](http://blog.csdn.net/biggercoffee/article/details/50288253)
 
 #什么是ZXPAutoLayout ?
 
