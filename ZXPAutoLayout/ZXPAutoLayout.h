@@ -247,46 +247,68 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 @interface UITableView (ZXPCellAutoHeight)
 
 /**
- *  根据配置cell的数据返回cell里的contentview的第一层subviews里 Y + height 最大的数值
+ *  cell的高度自适应, 在tableView: cellForRowAtIndexPath: 方法里请用
+    [tableView dequeueReusableCellWithIdentifier:cellid];
+    方式获取cell
+ 
+    请不要使用
+    [tableView dequeueReusableCellWithIdentifier:cellid forIndexPath:indexPath]; 
+    会造成野指针错误
  *
- *  @param identifier cell的identifier
- *  @param block      配置cell的数据block
+ *  @param indexPath indexPath
  *
- *  @return cell里的contentview的第一层subviews里 Y + height 最大的数值
+ *  @return 返回cell.contentView的子视图里 y+height 最大值的数值
  */
-- (CGFloat)zxp_cellHeightWithIdentifier:(NSString *)identifier config:(void(^)(__kindof UITableViewCell *cell))block;
+- (CGFloat)zxp_cellHeightWithindexPath:(NSIndexPath *)indexPath;
 
 /**
- *  根据配置cell的数据返回子控件距离上边最远的距离并加上space参数的值
+ *   cell的高度自适应, 在tableView: cellForRowAtIndexPath: 方法里请用
+     [tableView dequeueReusableCellWithIdentifier:cellid];
+     方式获取cell
+     
+     请不要使用
+     [tableView dequeueReusableCellWithIdentifier:cellid forIndexPath:indexPath];
+     会造成野指针错误
  *
- *  @param identifier cell的identifier
- *  @param block      配置cell的数据block
- *  @param space      cell的高度 + space
+ *  @param indexPath indexPath
+ *  @param block     block
  *
- *  @return cell的高度 + space
+ *  @return 返回block里return view的 y+height
  */
-- (CGFloat)zxp_cellHeightWithIdentifier:(NSString *)identifier config:(void(^)(__kindof UITableViewCell *cell))block space:(CGFloat)space;
+- (CGFloat)zxp_cellHeightWithindexPath:(NSIndexPath *)indexPath bottomView:(UIView *(^)(__kindof UITableViewCell *cell))block;
 
 /**
- *  根据配置cell的数据, 返回指定cell的某一个子view的 Y值+高度
+ *   cell的高度自适应, 在tableView: cellForRowAtIndexPath: 方法里请用
+     [tableView dequeueReusableCellWithIdentifier:cellid];
+     方式获取cell
+     
+     请不要使用
+     [tableView dequeueReusableCellWithIdentifier:cellid forIndexPath:indexPath];
+     会造成野指针错误
  *
- *  @param identifier cell的identifier
- *  @param block      配置cell的数据block, 并在block参数里返回指定的view
+ *  @param indexPath indexPath
+ *  @param block     block
+ *  @param space     space
  *
- *  @return 返回指定cell的某一个子view的 Y值+高度. 比如在block参数里return cell.textLabel; 则就会返回textLabel这个控件的 Y + height
+ *  @return 返回block里return view的 y+height+space
  */
-- (CGFloat)zxp_cellHeightWithIdentifier:(NSString *)identifier configAndReturnView:(UIView *(^)(__kindof UITableViewCell *cell))block;
+- (CGFloat)zxp_cellHeightWithindexPath:(NSIndexPath *)indexPath bottomView:(UIView *(^)(__kindof UITableViewCell *cell))block space:(CGFloat)space;;
 
 /**
- *  根据配置cell的数据, 返回指定cell的某一个子view的 Y值+高度
+ *   cell的高度自适应, 在tableView: cellForRowAtIndexPath: 方法里请用
+     [tableView dequeueReusableCellWithIdentifier:cellid];
+     方式获取cell
+     
+     请不要使用
+     [tableView dequeueReusableCellWithIdentifier:cellid forIndexPath:indexPath];
+     会造成野指针错误
  *
- *  @param identifier cell的identifier
- *  @param block      配置cell的数据block, 并在block参数里返回指定的view
- *  @param space      cell的高度 + space
+ *  @param indexPath indexPath
+ *  @param space     space
  *
- *  @return 返回指定cell的某一个子view的 Y值+高度. 比如在block参数里return cell.textLabel; 则就会返回textLabel这个控件的 Y + height + space
+ *  @return 返回cell.contentView的子视图里 y+height 最大值的数值 并且加上space参数的值
  */
-- (CGFloat)zxp_cellHeightWithIdentifier:(NSString *)identifier configAndReturnView:(UIView *(^)(__kindof UITableViewCell *cell))block space:(CGFloat)space;
+- (CGFloat)zxp_cellHeightWithindexPath:(NSIndexPath *)indexPath space:(CGFloat)space;
 
 @end
 

@@ -11,8 +11,7 @@
 @implementation TestTableViewCell
 
 - (void)awakeFromNib {
-    self.testLabel.translatesAutoresizingMaskIntoConstraints = NO;
-    self.testView.translatesAutoresizingMaskIntoConstraints = NO;
+    
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
