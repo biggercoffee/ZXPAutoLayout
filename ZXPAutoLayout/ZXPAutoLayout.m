@@ -836,58 +836,61 @@ NSString* layoutAttributeString(NSLayoutAttribute attribute) {
 
 #pragma mark - category UITableView + ZXPCellAutoHeight -> public apis
 
-- (CGFloat)zxp_cellHeightWithIdentifier:(NSString *)identifier config:(void(^)(__kindof UITableViewCell *cell))block {
-    UITableViewCell *cell = [self cellWithIdentifier:identifier];
+- (CGFloat)zxp_cellHeightWithindexPath:(NSIndexPath *)indexPath {
     
-    if (!block) {
-        NSAssert(NO, @"block不能为空");
-    }
-    block(cell);
-    UIWindow *window = [[UIApplication sharedApplication].delegate window];
-    [window layoutIfNeeded];
-    [cell layoutIfNeeded];
+    UITableViewCell *cell = [self cellWithIndexPath:indexPath];
     
     NSMutableArray *maxYArray = [NSMutableArray array];
     [cell.contentView.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [maxYArray addObject:@(CGRectGetMaxY(obj.frame))];
+        if (!obj.hidden) {
+            [maxYArray addObject:@(CGRectGetMaxY(obj.frame))];
+        }
     }];
     
     NSArray *compareMaxYArray = [maxYArray sortedArrayUsingSelector:@selector(compare:)];
     return [compareMaxYArray.lastObject floatValue];
 }
 
-- (CGFloat)zxp_cellHeightWithIdentifier:(NSString *)identifier config:(void(^)(__kindof UITableViewCell *cell))block space:(CGFloat)space {
-    return [self zxp_cellHeightWithIdentifier:identifier config:block] + space;
+- (CGFloat)zxp_cellHeightWithindexPath:(NSIndexPath *)indexPath space:(CGFloat)space {
+    return [self zxp_cellHeightWithindexPath:indexPath] + space;
 }
 
-- (CGFloat)zxp_cellHeightWithIdentifier:(NSString *)identifier configAndReturnView:(UIView *(^)(__kindof UITableViewCell *cell))block {
-    UITableViewCell *cell = [self cellWithIdentifier:identifier];
+- (CGFloat)zxp_cellHeightWithindexPath:(NSIndexPath *)indexPath bottomView:(UIView *(^)(__kindof UITableViewCell *cell))block {
+
+    UITableViewCell *cell = [self cellWithIndexPath:indexPath];
     
     if (!block) {
-        NSAssert(NO, @"block不能为空");
+        return [self zxp_cellHeightWithindexPath:indexPath];
     }
-    UIView *view = block(cell);
+    
+    UIView *bottomView = block(cell);
+    
+    return CGRectGetMaxY(bottomView.frame);
+}
+
+- (CGFloat)zxp_cellHeightWithindexPath:(NSIndexPath *)indexPath bottomView:(UIView *(^)(__kindof UITableViewCell *cell))block space:(CGFloat)space {
+    return [self zxp_cellHeightWithindexPath:indexPath bottomView:block] + space;
+}
+
+#pragma mark - private
+
+- (UITableViewCell *)cellWithIndexPath:(NSIndexPath *)indexPath {
+    id dataSourceObj = self.dataSource;
+    
+    if (![dataSourceObj respondsToSelector:@selector(tableView:cellForRowAtIndexPath:)]) {
+        NSAssert(NO, @"请实现 tableView:cellForRowAtIndexPath: 方法");
+    }
+    
+    UITableViewCell *cell = [dataSourceObj tableView:self cellForRowAtIndexPath:indexPath];
+    
+    CGRect cellFrame = cell.frame;
+    cellFrame.size.width = CGRectGetWidth(self.frame);
+    cell.frame = cellFrame;
+    
     UIWindow *window = [[UIApplication sharedApplication].delegate window];
     [window layoutIfNeeded];
     [cell layoutIfNeeded];
     
-    return CGRectGetMaxY(view.frame);
-}
-
-- (CGFloat)zxp_cellHeightWithIdentifier:(NSString *)identifier configAndReturnView:(UIView *(^)(__kindof UITableViewCell *cell))block space:(CGFloat)space {
-    return [self zxp_cellHeightWithIdentifier:identifier configAndReturnView:block] + space;
-}
-
-#pragma mark - category UITableView + ZXPCellAutoHeight -> private
-
-- (UITableViewCell *)cellWithIdentifier:(NSString *)identifier {
-    UITableViewCell *cell = [self dequeueReusableCellWithIdentifier:identifier];
-    if (!cell) {
-        NSAssert(NO, @"请先调用tableview的 registerClass: forCellReuseIdentifier: 或者 registerNib: forCellReuseIdentifier: 方法来注册cell, identifier:%@",identifier);
-    }
-    CGRect cellFrame = cell.frame;
-    cellFrame.size.width = CGRectGetWidth(self.frame);
-    cell.frame = cellFrame;
     return cell;
 }
 

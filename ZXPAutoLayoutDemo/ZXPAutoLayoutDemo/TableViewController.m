@@ -72,15 +72,11 @@ static NSString * const kTestCellID = @"kTestCellID";
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    //cell 自适应的高度 + 10的距离, 调用此方法之前,请确保调用了  registerClass: forCellReuseIdentifier: 或者 registerNib: forCellReuseIdentifier: 方法来注册cell
-    return [tableView zxp_cellHeightWithIdentifier:kTestCellID config:^(__kindof UITableViewCell *cell) {
-        [self configTestCell:cell indexPath:indexPath];
-    } space:10];
+    return [tableView zxp_cellHeightWithindexPath:indexPath space:10];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    TestTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kTestCellID forIndexPath:indexPath];
+    TestTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kTestCellID];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     [self configTestCell:cell indexPath:indexPath];
     return cell;
