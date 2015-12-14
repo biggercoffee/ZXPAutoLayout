@@ -584,10 +584,10 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
             }
         }
         else if (attribute == NSLayoutAttributeRight) {
-            if (obj.firstItem == self.view && (obj.firstAttribute == attribute || obj.firstAttribute == NSLayoutAttributeTrailing)) {
-                obj.constant = constant;
-                *stop = YES;
-            }
+            *stop = [self updateRightOrBottomWithConstraint:obj firstAttr:NSLayoutAttributeTrailing secondAttr:attribute constant:constant];
+        }
+        else if (attribute == NSLayoutAttributeBottom) {
+            *stop = [self updateRightOrBottomWithConstraint:obj firstAttr:NSLayoutAttributeBottom secondAttr:attribute constant:constant];
         }
         else {
             if (obj.firstItem == view && obj.firstAttribute == attribute) {
@@ -597,6 +597,23 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
         }
     }];
     
+    [self.view layoutIfNeeded];
+    
+}
+
+- (BOOL)updateRightOrBottomWithConstraint:(NSLayoutConstraint *)obj firstAttr:(NSLayoutAttribute)firstAttr secondAttr:(NSLayoutAttribute)secondAttr constant:(CGFloat)constant {
+    
+    //更新ib里添加的约束, 右边距和下边距要特殊处理
+    BOOL ibConstant = (obj.firstItem == self.view.superview && obj.firstAttribute == firstAttr ) && (obj.secondItem == self.view && obj.secondAttribute == firstAttr);
+    if ( ibConstant ) { //ib添加的约束
+        obj.constant = constant;
+        return YES;
+    }
+    else if ( obj.firstItem == self.view && obj.firstAttribute == secondAttr ) { // ZXPAutoLayout添加的约束
+        obj.constant = 0.0 - constant;
+        return YES;
+    }
+    return NO;
 }
 
 #pragma mark - deprecated private methods , 保留1.0之前的api所使用的私有方法.
