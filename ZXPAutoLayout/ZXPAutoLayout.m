@@ -931,7 +931,7 @@ NSString *heightDictionaryKey(NSIndexPath *indexPath);
         NSAssert(NO, @"请实现 tableView:cellForRowAtIndexPath: 方法");
     }
     
-    BOOL isExchangeReloadData = objc_getAssociatedObject(self, &kIsExchangeReloadData);
+    BOOL isExchangeReloadData = [objc_getAssociatedObject(self, &kIsExchangeReloadData) boolValue];
     if (!isExchangeReloadData) {
         objc_setAssociatedObject(self, &kIsExchangeReloadData, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         
