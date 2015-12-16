@@ -522,6 +522,9 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
 - (void)addOrUpdateConstraintWithFristView:(UIView *)firstView firstAttribute:(NSLayoutAttribute)firstAttribute relatedBy:(NSLayoutRelation)relation secondView:(UIView *)secondView secondAttribute:(NSLayoutAttribute)secondAttribute multiplier:(CGFloat)multiplier constant:(CGFloat)constant {
     
     if (self.layoutType == ZXPAutoLayoutMakerAdd) {
+        
+        NSAssert(self.view.superview, @"请先添加superview : %@",self.view);
+        
         [self addConstraintWithFristView:firstView firstAttribute:firstAttribute relatedBy:relation secondView:secondView secondAttribute:secondAttribute multiplier:multiplier constant:constant];
     }
     else { //update
@@ -849,23 +852,27 @@ NSString* layoutAttributeString(NSLayoutAttribute attribute) {
 
 #pragma mark - category UITableView + ZXPCellAutoHeight
 
+static NSString * const kTableViewCellHeightDictionary = @"kTableViewCellHeightDictionary_zxp";
+static NSString * const kIsExchangeReloadData = @"kIsExchangeReloadData_zxp";
+
+NSString *heightDictionaryKey(NSIndexPath *indexPath);
+
 @implementation UITableView (ZXPCellAutoHeight)
 
 #pragma mark - category UITableView + ZXPCellAutoHeight -> public apis
 
 - (CGFloat)zxp_cellHeightWithindexPath:(NSIndexPath *)indexPath {
-    
-    UITableViewCell *cell = [self cellWithIndexPath:indexPath];
-    
-    NSMutableArray *maxYArray = [NSMutableArray array];
-    [cell.contentView.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if (!obj.hidden) {
-            [maxYArray addObject:@(CGRectGetMaxY(obj.frame))];
-        }
+    return [self heightWithIndexPath:indexPath handle:^CGFloat(UITableViewCell *cell, NSIndexPath *indexPath) {
+        NSMutableArray *maxYArray = [NSMutableArray array];
+        [cell.contentView.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if (!obj.hidden) {
+                [maxYArray addObject:@(CGRectGetMaxY(obj.frame))];
+            }
+        }];
+        
+        NSArray *compareMaxYArray = [maxYArray sortedArrayUsingSelector:@selector(compare:)];
+        return [compareMaxYArray.lastObject floatValue];
     }];
-    
-    NSArray *compareMaxYArray = [maxYArray sortedArrayUsingSelector:@selector(compare:)];
-    return [compareMaxYArray.lastObject floatValue];
 }
 
 - (CGFloat)zxp_cellHeightWithindexPath:(NSIndexPath *)indexPath space:(CGFloat)space {
@@ -873,16 +880,14 @@ NSString* layoutAttributeString(NSLayoutAttribute attribute) {
 }
 
 - (CGFloat)zxp_cellHeightWithindexPath:(NSIndexPath *)indexPath bottomView:(UIView *(^)(__kindof UITableViewCell *cell))block {
-
-    UITableViewCell *cell = [self cellWithIndexPath:indexPath];
-    
-    if (!block) {
-        return [self zxp_cellHeightWithindexPath:indexPath];
-    }
-    
-    UIView *bottomView = block(cell);
-    
-    return CGRectGetMaxY(bottomView.frame);
+    return [self heightWithIndexPath:indexPath handle:^CGFloat(UITableViewCell *cell, NSIndexPath *indexPath) {
+        if (!block) {
+            return [self zxp_cellHeightWithindexPath:indexPath];
+        }
+        
+        UIView *bottomView = block(cell);
+        return CGRectGetMaxY(bottomView.frame);
+    }];
 }
 
 - (CGFloat)zxp_cellHeightWithindexPath:(NSIndexPath *)indexPath bottomView:(UIView *(^)(__kindof UITableViewCell *cell))block space:(CGFloat)space {
@@ -891,6 +896,34 @@ NSString* layoutAttributeString(NSLayoutAttribute attribute) {
 
 #pragma mark - private
 
+- (CGFloat)heightWithIndexPath:(NSIndexPath *)indexPath handle:(CGFloat(^)(UITableViewCell *cell,NSIndexPath *indexPath))block {
+    
+    NSMutableDictionary *heightDictionary = [self heightDictionary];
+    NSString *dictionaryKey = heightDictionaryKey(indexPath);
+    CGFloat cacheHeight = [heightDictionary[dictionaryKey] floatValue];
+    
+    if (!cacheHeight) {
+        UITableViewCell *cell = [self cellWithIndexPath:indexPath];
+        
+        CGFloat height = block(cell,indexPath);
+        
+        cacheHeight = !height ? CGFLOAT_MIN : height;
+        [heightDictionary setObject:@(cacheHeight) forKey:dictionaryKey];
+        
+    }
+    
+    return cacheHeight;
+}
+
+- (NSMutableDictionary *)heightDictionary {
+    NSMutableDictionary *heightDictionary = objc_getAssociatedObject(self, &kTableViewCellHeightDictionary);
+    if (!heightDictionary) {
+        heightDictionary = [NSMutableDictionary dictionary];
+        objc_setAssociatedObject(self, &kTableViewCellHeightDictionary, heightDictionary, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    return heightDictionary;
+}
+
 - (UITableViewCell *)cellWithIndexPath:(NSIndexPath *)indexPath {
     id dataSourceObj = self.dataSource;
     
@@ -898,17 +931,70 @@ NSString* layoutAttributeString(NSLayoutAttribute attribute) {
         NSAssert(NO, @"请实现 tableView:cellForRowAtIndexPath: 方法");
     }
     
+    BOOL isExchangeReloadData = objc_getAssociatedObject(self, &kIsExchangeReloadData);
+    if (!isExchangeReloadData) {
+        objc_setAssociatedObject(self, &kIsExchangeReloadData, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        
+        method_exchangeImplementations(class_getInstanceMethod([self class], @selector(reloadData)), class_getInstanceMethod([self class], @selector(swizzleReloadData)));
+        
+        method_exchangeImplementations(class_getInstanceMethod([self class], @selector(reloadRowsAtIndexPaths:withRowAnimation:)), class_getInstanceMethod([self class], @selector(swizzleReloadRowsAtIndexPaths:withRowAnimation:)));
+        
+        method_exchangeImplementations(class_getInstanceMethod([self class], @selector(reloadSections:withRowAnimation:)), class_getInstanceMethod([self class], @selector(swizzleReloadSections:withRowAnimation:)));
+    }
+    
+    UIWindow *window = [[UIApplication sharedApplication].delegate window];
+    [window layoutIfNeeded];
+    
     UITableViewCell *cell = [dataSourceObj tableView:self cellForRowAtIndexPath:indexPath];
     
     CGRect cellFrame = cell.frame;
     cellFrame.size.width = CGRectGetWidth(self.frame);
     cell.frame = cellFrame;
     
-    UIWindow *window = [[UIApplication sharedApplication].delegate window];
-    [window layoutIfNeeded];
     [cell layoutIfNeeded];
     
     return cell;
+}
+
+#pragma mark swizzle method
+
+- (void)swizzleReloadData {
+    [self swizzleReloadData];
+    [[self heightDictionary] removeAllObjects];
+}
+
+- (void)swizzleReloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation {
+    [self swizzleReloadRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+    
+    [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [[self heightDictionary] removeObjectForKey:heightDictionaryKey(obj)];
+    }];
+    
+}
+
+- (void)swizzleReloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation {
+    [self swizzleReloadSections:sections withRowAnimation:animation];
+    
+    NSMutableArray *tempArray = [NSMutableArray array];
+    
+    [sections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+        NSUInteger section = idx;
+        [[[self heightDictionary] allKeys] enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSString *sectionString = [obj componentsSeparatedByString:@"-"].firstObject;
+            
+            if (section == [sectionString longLongValue]) {
+                [tempArray addObject:obj];
+            }
+            
+        }];
+    }];
+    
+    [[self heightDictionary] removeObjectsForKeys:tempArray];
+    
+}
+
+NSString *heightDictionaryKey(NSIndexPath *indexPath) {
+    return [NSString stringWithFormat:@"%zi-%zi",indexPath.section,indexPath.row];
 }
 
 @end
