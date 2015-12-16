@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "ZXPAutoLayout"  #名字
-  s.version      = "1.2.2"  #版本号
+  s.version      = "1.2.2.1"  #版本号
   s.summary      = "ZXPAutoLayout" #简短的介绍
   s.homepage     = "https://github.com/biggercoffee/ZXPAutoLayout"   #主页,这里要填写可以访问到的地址，不然验证不通过
   s.license      = "MIT"  #开源协议
