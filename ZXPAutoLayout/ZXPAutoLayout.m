@@ -853,11 +853,20 @@ NSString* layoutAttributeString(NSLayoutAttribute attribute) {
 #pragma mark - category UITableView + ZXPCellAutoHeight
 
 static NSString * const kTableViewCellHeightDictionary = @"kTableViewCellHeightDictionary_zxp";
-static NSString * const kIsExchangeReloadData = @"kIsExchangeReloadData_zxp";
 
-NSString *heightDictionaryKey(NSIndexPath *indexPath);
+NSString *zxp_heightDictionaryKey(NSIndexPath *indexPath);
 
 @implementation UITableView (ZXPCellAutoHeight)
+
++ (void)load {
+    
+    method_exchangeImplementations(class_getInstanceMethod([self class], @selector(reloadData)), class_getInstanceMethod([self class], @selector(swizzleReloadData)));
+    
+    method_exchangeImplementations(class_getInstanceMethod([self class], @selector(reloadRowsAtIndexPaths:withRowAnimation:)), class_getInstanceMethod([self class], @selector(swizzleReloadRowsAtIndexPaths:withRowAnimation:)));
+    
+    method_exchangeImplementations(class_getInstanceMethod([self class], @selector(reloadSections:withRowAnimation:)), class_getInstanceMethod([self class], @selector(swizzleReloadSections:withRowAnimation:)));
+    
+}
 
 #pragma mark - category UITableView + ZXPCellAutoHeight -> public apis
 
@@ -898,8 +907,8 @@ NSString *heightDictionaryKey(NSIndexPath *indexPath);
 
 - (CGFloat)heightWithIndexPath:(NSIndexPath *)indexPath handle:(CGFloat(^)(UITableViewCell *cell,NSIndexPath *indexPath))block {
     
-    NSMutableDictionary *heightDictionary = [self heightDictionary];
-    NSString *dictionaryKey = heightDictionaryKey(indexPath);
+    NSMutableDictionary *heightDictionary = [self zxp_heightDictionary];
+    NSString *dictionaryKey = zxp_heightDictionaryKey(indexPath);
     CGFloat cacheHeight = [heightDictionary[dictionaryKey] floatValue];
     
     if (!cacheHeight) {
@@ -915,7 +924,7 @@ NSString *heightDictionaryKey(NSIndexPath *indexPath);
     return cacheHeight;
 }
 
-- (NSMutableDictionary *)heightDictionary {
+- (NSMutableDictionary *)zxp_heightDictionary {
     NSMutableDictionary *heightDictionary = objc_getAssociatedObject(self, &kTableViewCellHeightDictionary);
     if (!heightDictionary) {
         heightDictionary = [NSMutableDictionary dictionary];
@@ -929,17 +938,6 @@ NSString *heightDictionaryKey(NSIndexPath *indexPath);
     
     if (![dataSourceObj respondsToSelector:@selector(tableView:cellForRowAtIndexPath:)]) {
         NSAssert(NO, @"请实现 tableView:cellForRowAtIndexPath: 方法");
-    }
-    
-    id isExchangeReloadData = objc_getAssociatedObject(self, &kIsExchangeReloadData);
-    if (!isExchangeReloadData) {
-        objc_setAssociatedObject(self, &kIsExchangeReloadData, @"YES", OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-        
-        method_exchangeImplementations(class_getInstanceMethod([self class], @selector(reloadData)), class_getInstanceMethod([self class], @selector(swizzleReloadData)));
-        
-        method_exchangeImplementations(class_getInstanceMethod([self class], @selector(reloadRowsAtIndexPaths:withRowAnimation:)), class_getInstanceMethod([self class], @selector(swizzleReloadRowsAtIndexPaths:withRowAnimation:)));
-        
-        method_exchangeImplementations(class_getInstanceMethod([self class], @selector(reloadSections:withRowAnimation:)), class_getInstanceMethod([self class], @selector(swizzleReloadSections:withRowAnimation:)));
     }
     
     UIWindow *window = [[UIApplication sharedApplication].delegate window];
@@ -960,14 +958,14 @@ NSString *heightDictionaryKey(NSIndexPath *indexPath);
 
 - (void)swizzleReloadData {
     [self swizzleReloadData];
-    [[self heightDictionary] removeAllObjects];
+    [[self zxp_heightDictionary] removeAllObjects];
 }
 
 - (void)swizzleReloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation {
     [self swizzleReloadRowsAtIndexPaths:indexPaths withRowAnimation:animation];
     
     [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [[self heightDictionary] removeObjectForKey:heightDictionaryKey(obj)];
+        [[self zxp_heightDictionary] removeObjectForKey:zxp_heightDictionaryKey(obj)];
     }];
     
 }
@@ -979,7 +977,7 @@ NSString *heightDictionaryKey(NSIndexPath *indexPath);
     
     [sections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
         NSUInteger section = idx;
-        [[[self heightDictionary] allKeys] enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [[[self zxp_heightDictionary] allKeys] enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSString *sectionString = [obj componentsSeparatedByString:@"-"].firstObject;
             
             if (section == [sectionString longLongValue]) {
@@ -989,11 +987,11 @@ NSString *heightDictionaryKey(NSIndexPath *indexPath);
         }];
     }];
     
-    [[self heightDictionary] removeObjectsForKeys:tempArray];
+    [[self zxp_heightDictionary] removeObjectsForKeys:tempArray];
     
 }
 
-NSString *heightDictionaryKey(NSIndexPath *indexPath) {
+NSString *zxp_heightDictionaryKey(NSIndexPath *indexPath) {
     return [NSString stringWithFormat:@"%zi-%zi",indexPath.section,indexPath.row];
 }
 
