@@ -5,16 +5,16 @@
  
  ***************** ***************** ***************** *****************
  
-    version : 1.2.3
-    support : Xcode7.0以上 , iOS 7 以上
-    简洁方便的autolayout, 打造天朝最优, 最简洁方便, 最容易上手的autolayout
-    有任何问题或者需要改善交流的 可在 csdn博客或者github里给我提问题也可以联系我本人QQ
-    github : https://github.com/biggercoffee/ZXPAutolayout
-    csdn blog : http://blog.csdn.net/biggercoffee
-    QQ : 974792506
-    Email: z_xiaoping@163.com
+ version : 1.3.0
+ support : Xcode7.0以上 , iOS 7 以上
+ 简洁方便的autolayout, 打造天朝最优, 最简洁方便, 最容易上手的autolayout
+ 有任何问题或者需要改善交流的 可在 csdn博客或者github里给我提问题也可以联系我本人QQ
+ github : https://github.com/biggercoffee/ZXPAutolayout
+ csdn blog : http://blog.csdn.net/biggercoffee
+ QQ : 974792506
+ Email: z_xiaoping@163.com
  
-  ***************** ***************** ***************** *****************
+ ***************** ***************** ***************** *****************
  */
 //  Created by coffee on 15/10/10.
 //  Copyright © 2015年 coffee. All rights reserved.
@@ -62,7 +62,7 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 @interface ZXPAutoLayoutMaker : NSObject
 
 /*
-    设置在superview里的距离
+ 设置在superview里的距离
  */
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^topSpace)(CGFloat value);
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^leftSpace)(CGFloat value);
@@ -80,77 +80,92 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^edgeEqualTo)(UIView *view);
 
 /*
-    居中操作
+ 居中操作,\
+ 第一个参数是参考某一个view进行居中
+ 第二个参数是参考某一个view居中过后在加上多少距离, 可不写.默认为0. 因为这是一个可变参数. 接收整形和浮点型
+ 公式: 居中(第一个参数) + 值(第二个参数)
+ 例子:
+ layout.centerByView(superview); //在父视图中居中
+ layout.centerByView(superview,100);//在父视图中居中并且x,y在累加100的距离
+ 其他用法同上~!
  */
 //参考某一个view进行水平居中
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^xCenterByView)(UIView *view);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^xCenterByView)(UIView *view,...);
 //参考某一个view进行垂直居中
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^yCenterByView)(UIView *view);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^yCenterByView)(UIView *view,...);
 //参考某一个view进行居中
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^centerByView)(UIView *view);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^centerByView)(UIView *view,...);
 
 /*
-    边距和宽高带有 EqualTo 或者 ByView 结尾的方法都带有两个参数.
-    第一个参数为其他view
-    第二个参数为在此基础之上累加的数值
-*/
-
-/*
-    设置距离其它view的间距, 两个参数
-    @param view  其它view
-    @param value 距离多少间距
+ 边距和宽高带有 EqualTo 或者 ByView 结尾的方法都带有两个参数.第二个参数是一个可变参数,只会取可变参数里的第一个值也就是所谓的第二个参数. 接收整形和浮点型
+ 第一个参数为其他view
+ 第二个参数为在此基础之上累加的数值, 可传递可不传递,默认0. 接收整形和浮点型
+ 公式: view(第一个参数) + 值(第二个参数)
  */
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^topSpaceByView)(UIView *view,CGFloat value);
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^leftSpaceByView)(UIView *view,CGFloat value);
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^bottomSpaceByView)(UIView *view,CGFloat value);
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^rightSpaceByView)(UIView *view,CGFloat value);
 
 /*
-    设置view的距离参照与某一个view.有两个参数, 第一个是view, 第二个是value
-    如果第二个参数value 为0, 则距离等同于参照view的距离.
-    如果第二个参数value不为0, 则在参照的view的基础之上加上这个参数的值
-    公式 : 其他view的距离 + value
-    @param view  其它view
-    @param value 距离多少间距,如果要与其他view距离保持一样,此数值写为0即可. 
-                 如果要在其他view的距离基础之上在加100的距离, 此数值就写成100即可
+ 设置距离其它view的间距, 两个参数
+ @param view  其它view
+ @param ... 距离多少间距,这是一个可变参数. 可不写,默认为0. 也可以手动传递,接收整形和浮点型
+ 公式: view(第一个参数) + 值(第二个参数)
+ 
+ 例子:
+ layout.topSpaceByView(otherView); //上边距离参考其他view, 也就是在某一个view的下边
+ layout.topSpaceByView(otherView,100);//上边距离参考其他view, 也就是在某一个view的下边并且在累加100的距离
+ 其他用法同上~!
  */
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^topSpaceEqualTo)(UIView *view,CGFloat value);
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^leftSpaceEqualTo)(UIView *view,CGFloat value);
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^bottomSpaceEqualTo)(UIView *view,CGFloat value);
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^rightSpaceEqualTo)(UIView *view,CGFloat value);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^topSpaceByView)(UIView *view,...);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^leftSpaceByView)(UIView *view,...);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^bottomSpaceByView)(UIView *view,...);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^rightSpaceByView)(UIView *view,...);
+
+/*
+ @param view 设置view的距离参照与某一个view.有两个参数, 第一个是view, 第二个是value
+ @param ...第二个参数
+ 可不写,默认为0. 也可以手动传递,接收整形和浮点型
+ 如果第二个参数value 为0, 则距离等同于参照view的距离.
+ 如果第二个参数value不为0, 则在参照的view的基础之上加上这个参数的值
+ 公式 : 其他view的距离 + value
+ 例子: 同上~!
+ */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^topSpaceEqualTo)(UIView *view,...);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^leftSpaceEqualTo)(UIView *view,...);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^bottomSpaceEqualTo)(UIView *view,...);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^rightSpaceEqualTo)(UIView *view,...);
 
 /*
  设置宽高与其他view相等
  公式 : 其他view的宽或者高 + value
  @param view  其它view
- @param value 值
+ @param ... 值, 可不写,默认为0. 也可以手动传递,接收整形和浮点型
+ 例子: 同上~!
  */
-@property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^widthEqualTo)(UIView *view,CGFloat value);
-@property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^heightEqualTo)(UIView *view,CGFloat value);
+@property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^widthEqualTo)(UIView *view,...);
+@property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^heightEqualTo)(UIView *view,...);
 
 /*
-    设置宽高
+ 设置宽高
  */
 @property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^widthValue)(CGFloat value);
 @property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^heightValue)(CGFloat value);
 
 /**
-    根据文字自适应高度, 只针对UILabel控件生效. 最小值为0
+ 根据文字自适应高度, 只针对UILabel控件生效. 最小值为0
  */
 @property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^autoHeight)();
 
 /**
-    根据最小值进行文字自适应高度, 只针对UILabel控件生效.
+ 根据最小值进行文字自适应高度, 只针对UILabel控件生效.
  */
 @property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^autoHeightByMin)(CGFloat value);
 
 /**
-    根据文字自适应宽度, 只针对UILabel控件生效. 最小值为0
+ 根据文字自适应宽度, 只针对UILabel控件生效. 最小值为0
  */
 @property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^autoWidth)();
 
 /**
-    根据最小值文字自适应宽度, 只针对UILabel控件生效.
+ 根据最小值文字自适应宽度, 只针对UILabel控件生效.
  */
 @property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^autoWidthByMin)(CGFloat value);
 
@@ -161,9 +176,9 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 
 /**
  *  倍数,原始值的多少倍,此函数只针对最后一次设置的约束生效,
-    例如: layout.topSpace(10).leftSpace(10).widthEqualTo(view1).multiplier(0.5).heightValue(40);
-    在这行代码里的倍数,只针对宽度生效,表示宽度是view1宽度的0.5倍.
-    如果想给多个属性增加倍数,则在对应的后面写上multiplier属性即可
+ 例如: layout.topSpace(10).leftSpace(10).widthEqualTo(view1).multiplier(0.5).heightValue(40);
+ 在这行代码里的倍数,只针对宽度生效,表示宽度是view1宽度的0.5倍.
+ 如果想给多个属性增加倍数,则在对应的后面写上multiplier属性即可
  */
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^multiplier)(CGFloat multiplier);
 
@@ -248,12 +263,12 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 
 /**
  *  cell的高度自适应, 在tableView: cellForRowAtIndexPath: 方法里请用
-    [tableView dequeueReusableCellWithIdentifier:cellid];
-    方式获取cell
+ [tableView dequeueReusableCellWithIdentifier:cellid];
+ 方式获取cell
  
-    请不要使用
-    [tableView dequeueReusableCellWithIdentifier:cellid forIndexPath:indexPath]; 
-    会造成野指针错误
+ 请不要使用
+ [tableView dequeueReusableCellWithIdentifier:cellid forIndexPath:indexPath];
+ 会造成野指针错误
  *
  *  @param indexPath indexPath
  *
@@ -263,12 +278,12 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 
 /**
  *   cell的高度自适应, 在tableView: cellForRowAtIndexPath: 方法里请用
-     [tableView dequeueReusableCellWithIdentifier:cellid];
-     方式获取cell
-     
-     请不要使用
-     [tableView dequeueReusableCellWithIdentifier:cellid forIndexPath:indexPath];
-     会造成野指针错误
+ [tableView dequeueReusableCellWithIdentifier:cellid];
+ 方式获取cell
+ 
+ 请不要使用
+ [tableView dequeueReusableCellWithIdentifier:cellid forIndexPath:indexPath];
+ 会造成野指针错误
  *
  *  @param indexPath indexPath
  *  @param block     block
@@ -279,12 +294,12 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 
 /**
  *   cell的高度自适应, 在tableView: cellForRowAtIndexPath: 方法里请用
-     [tableView dequeueReusableCellWithIdentifier:cellid];
-     方式获取cell
-     
-     请不要使用
-     [tableView dequeueReusableCellWithIdentifier:cellid forIndexPath:indexPath];
-     会造成野指针错误
+ [tableView dequeueReusableCellWithIdentifier:cellid];
+ 方式获取cell
+ 
+ 请不要使用
+ [tableView dequeueReusableCellWithIdentifier:cellid forIndexPath:indexPath];
+ 会造成野指针错误
  *
  *  @param indexPath indexPath
  *  @param block     block
@@ -296,12 +311,12 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 
 /**
  *   cell的高度自适应, 在tableView: cellForRowAtIndexPath: 方法里请用
-     [tableView dequeueReusableCellWithIdentifier:cellid];
-     方式获取cell
-     
-     请不要使用
-     [tableView dequeueReusableCellWithIdentifier:cellid forIndexPath:indexPath];
-     会造成野指针错误
+ [tableView dequeueReusableCellWithIdentifier:cellid];
+ 方式获取cell
+ 
+ 请不要使用
+ [tableView dequeueReusableCellWithIdentifier:cellid forIndexPath:indexPath];
+ 会造成野指针错误
  *
  *  @param indexPath indexPath
  *  @param space     space

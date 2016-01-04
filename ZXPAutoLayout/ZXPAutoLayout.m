@@ -10,9 +10,25 @@
 
 #import <objc/runtime.h>
 
-static NSString * const ZXPAutoLayoutMakerAdd = @"ZXPAutoLayoutMakerAdd-zxp";
-static NSString * const ZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate-zxp";
-static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
+#define kZXPSecondValueOfParams(firstParam,var) \
+va_list vaListParam; \
+va_start(vaListParam, firstParam); \
+var = va_arg(vaListParam, double); \
+NSString *va_constantString = [NSString stringWithFormat:@"%@",@(var)]; \
+if ([va_constantString.lowercaseString rangeOfString:@"e-"].location != NSNotFound) { \
+var = va_arg(vaListParam, int); \
+} \
+va_constantString = [NSString stringWithFormat:@"%@",@(var)];\
+if (va_constantString.length >= 9) {\
+var = 0.0;\
+}\
+va_end(vaListParam) \
+
+
+static NSString * const kZXPAutoLayoutMakerAdd = @"ZXPAutoLayoutMakerAdd-zxp";
+static NSString * const kZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate-zxp";
+static NSString * const kZXPAttributeKey = @"ZXPAttributeKey-zxp";
+static NSString * const kZXPNotFloatType = @"6.9532223570234712E-310";
 
 #pragma mark - private category of array
 
@@ -89,7 +105,7 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
 @property (nonatomic,strong) NSMutableArray<NSLayoutConstraint *> *tempRelatedConstraints;
 
 @property (nonatomic,strong) UIView *view;
-@property (strong,nonatomic) NSLayoutConstraint *lastConstraint;
+@property (nonatomic,strong) NSLayoutConstraint *lastConstraint;
 @property (nonatomic,assign) id layoutType;
 
 @end
@@ -102,7 +118,7 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
     NSMutableArray<NSString *> *layoutAttributeStringList = [NSMutableArray array];
     NSMutableArray<NSNumber *> *layoutAttributeValueList = [NSMutableArray array];
 #define enumToString(value) [layoutAttributeStringList addObject:@#value]; \
-                            [layoutAttributeValueList addObject:@(value)];
+[layoutAttributeValueList addObject:@(value)];
     enumToString(NSLayoutAttributeLeft)
     enumToString(NSLayoutAttributeRight)
     enumToString(NSLayoutAttributeTop)
@@ -132,9 +148,9 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
     
     [methods enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         SEL aSel = NSSelectorFromString(obj);
-       method_setImplementation(
-                                class_getInstanceMethod(ZXPAutoLayoutMaker.class,aSel),
-                                class_getMethodImplementation(ZXPAutoLayoutMaker.class, @selector(swizzleMethodForAttribute)));
+        method_setImplementation(
+                                 class_getInstanceMethod(ZXPAutoLayoutMaker.class,aSel),
+                                 class_getMethodImplementation(ZXPAutoLayoutMaker.class, @selector(swizzleMethodForAttribute)));
     }];
     //---------- 以上是已废弃的代码, 保留1.0之前的api实现 --------------
 }
@@ -194,25 +210,25 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
 
 - (ZXPAutoLayoutMaker *(^)(CGFloat))topSpace {
     return ^(CGFloat value) {
-        return [self addOrUpdateSpaceInSuperview:NSLayoutAttributeTop constant:value];
+        return [self p_addOrUpdateSpaceInSuperview:NSLayoutAttributeTop constant:value];
     };
 }
 
 - (ZXPAutoLayoutMaker *(^)(CGFloat))leftSpace {
     return ^(CGFloat value) {
-        return [self addOrUpdateSpaceInSuperview:NSLayoutAttributeLeft constant:value];
+        return [self p_addOrUpdateSpaceInSuperview:NSLayoutAttributeLeft constant:value];
     };
 }
 
 - (ZXPAutoLayoutMaker *(^)(CGFloat))bottomSpace {
     return ^(CGFloat value) {
-        return [self addOrUpdateSpaceInSuperview:NSLayoutAttributeBottom constant:value];
+        return [self p_addOrUpdateSpaceInSuperview:NSLayoutAttributeBottom constant:value];
     };
 }
 
 - (ZXPAutoLayoutMaker *(^)(CGFloat))rightSpace {
     return ^(CGFloat value) {
-        return [self addOrUpdateSpaceInSuperview:NSLayoutAttributeRight constant:value];
+        return [self p_addOrUpdateSpaceInSuperview:NSLayoutAttributeRight constant:value];
     };
 }
 
@@ -248,86 +264,109 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *))xCenterByView {
-    return ^(UIView *view) {
-        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeCenterX multiplier:1 constant:0];
+- (ZXPAutoLayoutMaker *(^)(UIView *,...))xCenterByView {
+    return ^(UIView *view,...) {
+        CGFloat constant = 0.0;
+        kZXPSecondValueOfParams(view, constant);
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeCenterX multiplier:1 constant:constant];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *))yCenterByView {
-    return ^(UIView *view) {
-        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeCenterY multiplier:1 constant:0];
+- (ZXPAutoLayoutMaker *(^)(UIView *,...))yCenterByView {
+    return ^(UIView *view,...) {
+        CGFloat constant = 0.0;
+        kZXPSecondValueOfParams(view, constant);
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeCenterY multiplier:1 constant:constant];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *))centerByView {
-    return ^(UIView *view) {
-        return self.xCenterByView(view).yCenterByView(view);
+- (ZXPAutoLayoutMaker *(^)(UIView *,...))centerByView {
+    return ^(UIView *view,...) {
+        CGFloat constant = 0.0;
+        kZXPSecondValueOfParams(view, constant);
+        return self.xCenterByView(view,constant).yCenterByView(view,constant);
     };
 }
 
 #pragma mark 设置距离其它view的间距
 /*
-    @param view  其它view
-    @param value 距离多少间距
-*/
+ @param view  其它view
+ @param value 距离多少间距
+ */
 
-- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))topSpaceByView {
-    return ^(UIView *view,CGFloat value) {
-        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeBottom multiplier:1 constant:value];
+- (ZXPAutoLayoutMaker *(^)(UIView *, ...))topSpaceByView {
+    return ^(UIView *view,...) {
+        CGFloat constant = 0.0;
+        kZXPSecondValueOfParams(view, constant);
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeBottom multiplier:1 constant:constant];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))leftSpaceByView {
-    return ^(UIView *view,CGFloat value) {
-        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeRight multiplier:1 constant:value];
+- (ZXPAutoLayoutMaker *(^)(UIView *, ...))leftSpaceByView {
+    return ^(UIView *view,...) {
+        double constant = 0.0;
+        kZXPSecondValueOfParams(view, constant);
+        NSLog(@"%f--%@",constant,va_constantString);
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeRight multiplier:1 constant:constant];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))bottomSpaceByView {
-    return ^(UIView *view,CGFloat value) {
-        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeTop multiplier:1 constant:value];
+- (ZXPAutoLayoutMaker *(^)(UIView *, ...))bottomSpaceByView {
+    return ^(UIView *view,...) {
+        CGFloat constant = 0.0;
+        kZXPSecondValueOfParams(view, constant);
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeTop multiplier:1 constant:constant];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))rightSpaceByView {
-    return ^(UIView *view,CGFloat value) {
-        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeLeft multiplier:1 constant:value];
+- (ZXPAutoLayoutMaker *(^)(UIView *, ...))rightSpaceByView {
+    return ^(UIView *view,...) {
+        CGFloat constant = 0.0;
+        kZXPSecondValueOfParams(view, constant);
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeLeft multiplier:1 constant:constant];
         return self;
     };
 }
 
 #pragma mark 设置距离与其他view相等
 
-- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))topSpaceEqualTo {
-    return ^(UIView *view,CGFloat value) {
-        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeTop multiplier:1 constant:value];
+- (ZXPAutoLayoutMaker *(^)(UIView *, ...))topSpaceEqualTo {
+    return ^(UIView *view,...) {
+        CGFloat constant = 0.0;
+        kZXPSecondValueOfParams(view, constant);
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeTop multiplier:1 constant:constant];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))leftSpaceEqualTo {
-    return ^(UIView *view,CGFloat value) {
-        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeLeft multiplier:1 constant:value];
+- (ZXPAutoLayoutMaker *(^)(UIView *, ...))leftSpaceEqualTo {
+    return ^(UIView *view,...) {
+        CGFloat constant = 0.0;
+        kZXPSecondValueOfParams(view, constant);
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeLeft multiplier:1 constant:constant];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))bottomSpaceEqualTo {
-    return ^(UIView *view,CGFloat value) {
-        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeBottom multiplier:1 constant:value];
+- (ZXPAutoLayoutMaker *(^)(UIView *, ...))bottomSpaceEqualTo {
+    return ^(UIView *view,...) {
+        CGFloat constant = 0.0;
+        kZXPSecondValueOfParams(view, constant);
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeBottom multiplier:1 constant:constant];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))rightSpaceEqualTo {
-    return ^(UIView *view,CGFloat value) {
-        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeRight multiplier:1 constant:value];
+- (ZXPAutoLayoutMaker *(^)(UIView *, ...))rightSpaceEqualTo {
+    return ^(UIView *view,...) {
+        CGFloat constant = 0.0;
+        kZXPSecondValueOfParams(view, constant);
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeRight multiplier:1 constant:constant];
         return self;
     };
 }
@@ -336,28 +375,32 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
 
 - (ZXPAutoLayoutMaker *(^)(CGFloat))widthValue {
     return ^(CGFloat value) {
-        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual secondView:nil secondAttribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:value];
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual secondView:nil secondAttribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:value];
         return self;
     };
 }
 
 - (ZXPAutoLayoutMaker *(^)(CGFloat))heightValue {
     return ^(CGFloat value) {
-        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual secondView:nil secondAttribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:value];
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual secondView:nil secondAttribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:value];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *,CGFloat))widthEqualTo {
-    return ^(UIView *view,CGFloat value) {
-        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeWidth multiplier:1 constant:value];
+- (ZXPAutoLayoutMaker *(^)(UIView *,...))widthEqualTo {
+    return ^(UIView *view,...) {
+        CGFloat constant = 0.0;
+        kZXPSecondValueOfParams(view, constant);
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeWidth multiplier:1 constant:constant];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *,CGFloat))heightEqualTo {
-    return ^(UIView *view,CGFloat value) {
-        [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeHeight multiplier:1 constant:value];
+- (ZXPAutoLayoutMaker *(^)(UIView *,...))heightEqualTo {
+    return ^(UIView *view,...) {
+        CGFloat constant = 0.0;
+        kZXPSecondValueOfParams(view, constant);
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeHeight multiplier:1 constant:constant];
         return self;
     };
 }
@@ -375,7 +418,7 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
         if ([self.view isKindOfClass:[UILabel class]]) {
             UILabel *label = (UILabel *) self.view;
             label.numberOfLines = 0;
-            [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationGreaterThanOrEqual secondView:nil secondAttribute:NSLayoutAttributeHeight multiplier:1 constant:value];
+            [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationGreaterThanOrEqual secondView:nil secondAttribute:NSLayoutAttributeHeight multiplier:1 constant:value];
         }
         return self;
     };
@@ -393,7 +436,7 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
             UILabel *label = (UILabel *) self.view;
             NSInteger line = label.numberOfLines;
             label.numberOfLines = line > 0 ? line : 1;
-            [self addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationGreaterThanOrEqual secondView:nil secondAttribute:NSLayoutAttributeWidth multiplier:1 constant:value];
+            [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationGreaterThanOrEqual secondView:nil secondAttribute:NSLayoutAttributeWidth multiplier:1 constant:value];
         }
         return self;
     };
@@ -501,8 +544,8 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
 
 #pragma mark - private methods
 
-- (id)addOrUpdateSpaceInSuperview:(NSLayoutAttribute) attribute constant:(CGFloat)constant {
-    [self addOrUpdateConstraintWithFristView:self.view firstAttribute:attribute relatedBy:NSLayoutRelationEqual secondView:nil secondAttribute:attribute multiplier:1 constant:constant];
+- (id)p_addOrUpdateSpaceInSuperview:(NSLayoutAttribute) attribute constant:(CGFloat)constant {
+    [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:attribute relatedBy:NSLayoutRelationEqual secondView:nil secondAttribute:attribute multiplier:1 constant:constant];
     return self;
 }
 
@@ -519,13 +562,13 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
  *  @param multiplier      比例 ( 0 -- 1 )
  *  @param constant        约束的值
  */
-- (void)addOrUpdateConstraintWithFristView:(UIView *)firstView firstAttribute:(NSLayoutAttribute)firstAttribute relatedBy:(NSLayoutRelation)relation secondView:(UIView *)secondView secondAttribute:(NSLayoutAttribute)secondAttribute multiplier:(CGFloat)multiplier constant:(CGFloat)constant {
+- (void)p_addOrUpdateConstraintWithFristView:(UIView *)firstView firstAttribute:(NSLayoutAttribute)firstAttribute relatedBy:(NSLayoutRelation)relation secondView:(UIView *)secondView secondAttribute:(NSLayoutAttribute)secondAttribute multiplier:(CGFloat)multiplier constant:(CGFloat)constant {
     
-    if (self.layoutType == ZXPAutoLayoutMakerAdd) {
+    if (self.layoutType == kZXPAutoLayoutMakerAdd) {
         
         NSAssert(self.view.superview, @"请先添加superview : %@",self.view);
         
-        [self addConstraintWithFristView:firstView firstAttribute:firstAttribute relatedBy:relation secondView:secondView secondAttribute:secondAttribute multiplier:multiplier constant:constant];
+        [self p_addConstraintWithFristView:firstView firstAttribute:firstAttribute relatedBy:relation secondView:secondView secondAttribute:secondAttribute multiplier:multiplier constant:constant];
     }
     else { //update
         
@@ -537,16 +580,16 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
                 }
                 
             }];
-            [self addConstraintWithFristView:firstView firstAttribute:firstAttribute relatedBy:relation secondView:secondView secondAttribute:secondAttribute multiplier:multiplier constant:constant];
+            [self p_addConstraintWithFristView:firstView firstAttribute:firstAttribute relatedBy:relation secondView:secondView secondAttribute:secondAttribute multiplier:multiplier constant:constant];
         }
         else {
-            [self updateConstraintWithFirstView:self.view firstAttribute:firstAttribute constant:constant];
+            [self p_updateConstraintWithFirstView:self.view firstAttribute:firstAttribute constant:constant];
         }
     }
-
+    
 }
 
-- (void)addConstraintWithFristView:(UIView *)firstView firstAttribute:(NSLayoutAttribute)firstAttribute relatedBy:(NSLayoutRelation)relation secondView:(UIView *)secondView secondAttribute:(NSLayoutAttribute)secondAttribute multiplier:(CGFloat)multiplier constant:(CGFloat)constant {
+- (void)p_addConstraintWithFristView:(UIView *)firstView firstAttribute:(NSLayoutAttribute)firstAttribute relatedBy:(NSLayoutRelation)relation secondView:(UIView *)secondView secondAttribute:(NSLayoutAttribute)secondAttribute multiplier:(CGFloat)multiplier constant:(CGFloat)constant {
     id view = nil;
     id toItem = nil;
     CGFloat value = firstAttribute == NSLayoutAttributeBottom || firstAttribute == NSLayoutAttributeRight ? 0.0 - constant : constant;
@@ -575,7 +618,7 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
     [view addConstraint:constraint];
 }
 
-- (void)updateConstraintWithFirstView:(UIView *)view firstAttribute:(NSLayoutAttribute)attribute constant:(CGFloat)constant {
+- (void)p_updateConstraintWithFirstView:(UIView *)view firstAttribute:(NSLayoutAttribute)attribute constant:(CGFloat)constant {
     
     NSArray<__kindof NSLayoutConstraint *> *constraints = attribute == NSLayoutAttributeWidth || attribute == NSLayoutAttributeHeight ? view.constraints : view.superview.constraints;
     [constraints enumerateObjectsUsingBlock:^(__kindof NSLayoutConstraint * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -587,10 +630,10 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
             }
         }
         else if (attribute == NSLayoutAttributeRight) {
-            *stop = [self updateRightOrBottomWithConstraint:obj firstAttr:NSLayoutAttributeTrailing secondAttr:attribute constant:constant];
+            *stop = [self p_updateRightOrBottomWithConstraint:obj firstAttr:NSLayoutAttributeTrailing secondAttr:attribute constant:constant];
         }
         else if (attribute == NSLayoutAttributeBottom) {
-            *stop = [self updateRightOrBottomWithConstraint:obj firstAttr:NSLayoutAttributeBottom secondAttr:attribute constant:constant];
+            *stop = [self p_updateRightOrBottomWithConstraint:obj firstAttr:NSLayoutAttributeBottom secondAttr:attribute constant:constant];
         }
         else {
             if (obj.firstItem == view && obj.firstAttribute == attribute) {
@@ -604,7 +647,7 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
     
 }
 
-- (BOOL)updateRightOrBottomWithConstraint:(NSLayoutConstraint *)obj firstAttr:(NSLayoutAttribute)firstAttr secondAttr:(NSLayoutAttribute)secondAttr constant:(CGFloat)constant {
+- (BOOL)p_updateRightOrBottomWithConstraint:(NSLayoutConstraint *)obj firstAttr:(NSLayoutAttribute)firstAttr secondAttr:(NSLayoutAttribute)secondAttr constant:(CGFloat)constant {
     
     //更新ib里添加的约束, 右边距和下边距要特殊处理
     BOOL ibConstant = (obj.firstItem == self.view.superview && obj.firstAttribute == firstAttr ) && (obj.secondItem == self.view && obj.secondAttribute == firstAttr);
@@ -657,7 +700,7 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
         
         NSLayoutAttribute firstAttribute = [attribute integerValue];
         
-        if ( self.layoutType == ZXPAutoLayoutMakerAdd ) {
+        if ( self.layoutType == kZXPAutoLayoutMakerAdd ) {
             
             id view = nil;
             id toItem = nil;
@@ -682,7 +725,7 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
             
         }
         else { //update
-            [self updateConstraintWithFirstView:self.view firstAttribute:firstAttribute constant:offset];
+            [self p_updateConstraintWithFirstView:self.view firstAttribute:firstAttribute constant:offset];
         }
         
     } //end for
@@ -701,9 +744,9 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
     }
     
     NSArray *distinctUnionAttributes = [self.constraintAttributes distinctUnionOfObjects];
-    NSLayoutAttribute secondAttribute = [objc_getAssociatedObject(secondView, &ZXPAttributeKey) integerValue];
+    NSLayoutAttribute secondAttribute = [objc_getAssociatedObject(secondView, &kZXPAttributeKey) integerValue];
     
-    if (self.layoutType == ZXPAutoLayoutMakerUpdate) { //如果是更新约束,就先删掉view对应的相对约束
+    if (self.layoutType == kZXPAutoLayoutMakerUpdate) { //如果是更新约束,就先删掉view对应的相对约束
         [self.view.superview.constraints enumerateObjectsUsingBlock:^(__kindof NSLayoutConstraint * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             
             for (id attribute in distinctUnionAttributes) {
@@ -744,9 +787,9 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
 }
 
 - (void)resetAttributeWithView:(UIView *)view {
-    NSLayoutAttribute secondAttribute = [objc_getAssociatedObject(view, &ZXPAttributeKey) integerValue];
+    NSLayoutAttribute secondAttribute = [objc_getAssociatedObject(view, &kZXPAttributeKey) integerValue];
     if ( secondAttribute != NSLayoutAttributeNotAnAttribute ) {
-        objc_setAssociatedObject(view, &ZXPAttributeKey, @(NSLayoutAttributeNotAnAttribute), OBJC_ASSOCIATION_ASSIGN);
+        objc_setAssociatedObject(view, &kZXPAttributeKey, @(NSLayoutAttributeNotAnAttribute), OBJC_ASSOCIATION_ASSIGN);
     }
 }
 
@@ -757,61 +800,61 @@ static NSString * const ZXPAttributeKey = @"ZXPAttributeKey-zxp";
 @implementation UIView (ZXPAdditions)
 
 - (id)zxp_top {
-    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeTop), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeTop), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_left {
-    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeLeft), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeLeft), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_bottom {
-    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeBottom), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeBottom), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_right {
-    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeRight), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeRight), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_leading {
-    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeLeading), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeLeading), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_trailing {
-    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeTrailing), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeTrailing), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_width {
-    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeWidth), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeWidth), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_height {
-    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeHeight), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeHeight), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_centerX {
-    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeCenterX), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeCenterX), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (id)zxp_centerY {
-    objc_setAssociatedObject(self, &ZXPAttributeKey, @(NSLayoutAttributeCenterY), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeCenterY), OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
 - (void)zxp_addConstraints:(void(^)(ZXPAutoLayoutMaker *layout))layout {
-    layout([[ZXPAutoLayoutMaker alloc] initWithView:self type:ZXPAutoLayoutMakerAdd]);
+    layout([[ZXPAutoLayoutMaker alloc] initWithView:self type:kZXPAutoLayoutMakerAdd]);
 }
 
 - (void)zxp_updateConstraints:(void(^)(ZXPAutoLayoutMaker *layout))layout {
-    layout([[ZXPAutoLayoutMaker alloc] initWithView:self type:ZXPAutoLayoutMakerUpdate]);
+    layout([[ZXPAutoLayoutMaker alloc] initWithView:self type:kZXPAutoLayoutMakerUpdate]);
 }
 
 - (void)zxp_printConstraintsForSelf {
@@ -854,24 +897,24 @@ NSString* layoutAttributeString(NSLayoutAttribute attribute) {
 
 static NSString * const kTableViewCellHeightDictionary = @"kTableViewCellHeightDictionary_zxp";
 
-NSString *zxp_heightDictionaryKey(NSIndexPath *indexPath);
+NSString *p_zxp_heightDictionaryKey(NSIndexPath *indexPath);
+void p_zxp_swizzleMethodOfSelf(Class aClass,SEL sel1,SEL sel2);
 
 @implementation UITableView (ZXPCellAutoHeight)
 
 + (void)load {
     
-    method_exchangeImplementations(class_getInstanceMethod([self class], @selector(reloadData)), class_getInstanceMethod([self class], @selector(swizzleReloadData)));
-    
-    method_exchangeImplementations(class_getInstanceMethod([self class], @selector(reloadRowsAtIndexPaths:withRowAnimation:)), class_getInstanceMethod([self class], @selector(swizzleReloadRowsAtIndexPaths:withRowAnimation:)));
-    
-    method_exchangeImplementations(class_getInstanceMethod([self class], @selector(reloadSections:withRowAnimation:)), class_getInstanceMethod([self class], @selector(swizzleReloadSections:withRowAnimation:)));
-    
+    p_zxp_swizzleMethodOfSelf([self class], @selector(reloadData), @selector(p_zxp_swizzleReloadData));
+    p_zxp_swizzleMethodOfSelf([self class],@selector(reloadRowsAtIndexPaths:withRowAnimation:),@selector(p_zxp_swizzleReloadRowsAtIndexPaths:withRowAnimation:));
+    p_zxp_swizzleMethodOfSelf([self class],@selector(reloadSections:withRowAnimation:),@selector(p_zxp_swizzleReloadSections:withRowAnimation:));
+    p_zxp_swizzleMethodOfSelf([self class],@selector(deleteSections:withRowAnimation:),@selector(p_zxp_swizzleReloadSections:withRowAnimation:));
+    p_zxp_swizzleMethodOfSelf([self class],@selector(deleteRowsAtIndexPaths:withRowAnimation:),@selector(p_zxp_swizzleDeleteRowsAtIndexPaths:withRowAnimation:));
 }
 
 #pragma mark - category UITableView + ZXPCellAutoHeight -> public apis
 
 - (CGFloat)zxp_cellHeightWithindexPath:(NSIndexPath *)indexPath {
-    return [self heightWithIndexPath:indexPath handle:^CGFloat(UITableViewCell *cell, NSIndexPath *indexPath) {
+    return [self p_zxp_heightWithIndexPath:indexPath handle:^CGFloat(UITableViewCell *cell, NSIndexPath *indexPath) {
         NSMutableArray *maxYArray = [NSMutableArray array];
         [cell.contentView.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             if (!obj.hidden) {
@@ -889,7 +932,7 @@ NSString *zxp_heightDictionaryKey(NSIndexPath *indexPath);
 }
 
 - (CGFloat)zxp_cellHeightWithindexPath:(NSIndexPath *)indexPath bottomView:(UIView *(^)(__kindof UITableViewCell *cell))block {
-    return [self heightWithIndexPath:indexPath handle:^CGFloat(UITableViewCell *cell, NSIndexPath *indexPath) {
+    return [self p_zxp_heightWithIndexPath:indexPath handle:^CGFloat(UITableViewCell *cell, NSIndexPath *indexPath) {
         if (!block) {
             return [self zxp_cellHeightWithindexPath:indexPath];
         }
@@ -905,14 +948,14 @@ NSString *zxp_heightDictionaryKey(NSIndexPath *indexPath);
 
 #pragma mark - private
 
-- (CGFloat)heightWithIndexPath:(NSIndexPath *)indexPath handle:(CGFloat(^)(UITableViewCell *cell,NSIndexPath *indexPath))block {
+- (CGFloat)p_zxp_heightWithIndexPath:(NSIndexPath *)indexPath handle:(CGFloat(^)(UITableViewCell *cell,NSIndexPath *indexPath))block {
     
-    NSMutableDictionary *heightDictionary = [self zxp_heightDictionary];
-    NSString *dictionaryKey = zxp_heightDictionaryKey(indexPath);
+    NSMutableDictionary *heightDictionary = [self p_zxp_heightDictionary];
+    NSString *dictionaryKey = p_zxp_heightDictionaryKey(indexPath);
     CGFloat cacheHeight = [heightDictionary[dictionaryKey] floatValue];
     
     if (!cacheHeight) {
-        UITableViewCell *cell = [self cellWithIndexPath:indexPath];
+        UITableViewCell *cell = [self p_zxp_cellWithIndexPath:indexPath];
         
         CGFloat height = block(cell,indexPath);
         
@@ -924,7 +967,7 @@ NSString *zxp_heightDictionaryKey(NSIndexPath *indexPath);
     return cacheHeight;
 }
 
-- (NSMutableDictionary *)zxp_heightDictionary {
+- (NSMutableDictionary *)p_zxp_heightDictionary {
     NSMutableDictionary *heightDictionary = objc_getAssociatedObject(self, &kTableViewCellHeightDictionary);
     if (!heightDictionary) {
         heightDictionary = [NSMutableDictionary dictionary];
@@ -933,12 +976,10 @@ NSString *zxp_heightDictionaryKey(NSIndexPath *indexPath);
     return heightDictionary;
 }
 
-- (UITableViewCell *)cellWithIndexPath:(NSIndexPath *)indexPath {
+- (UITableViewCell *)p_zxp_cellWithIndexPath:(NSIndexPath *)indexPath {
     id dataSourceObj = self.dataSource;
     
-    if (![dataSourceObj respondsToSelector:@selector(tableView:cellForRowAtIndexPath:)]) {
-        NSAssert(NO, @"请实现 tableView:cellForRowAtIndexPath: 方法");
-    }
+    NSAssert([dataSourceObj respondsToSelector:@selector(tableView:cellForRowAtIndexPath:)], @"请实现 tableView:cellForRowAtIndexPath: 方法");
     
     UIWindow *window = [[UIApplication sharedApplication].delegate window];
     [window layoutIfNeeded];
@@ -956,28 +997,28 @@ NSString *zxp_heightDictionaryKey(NSIndexPath *indexPath);
 
 #pragma mark swizzle method
 
-- (void)swizzleReloadData {
-    [self swizzleReloadData];
-    [[self zxp_heightDictionary] removeAllObjects];
+- (void)p_zxp_swizzleReloadData {
+    [self p_zxp_swizzleReloadData];
+    [[self p_zxp_heightDictionary] removeAllObjects];
 }
 
-- (void)swizzleReloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation {
-    [self swizzleReloadRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+- (void)p_zxp_swizzleReloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation {
+    [self p_zxp_swizzleReloadRowsAtIndexPaths:indexPaths withRowAnimation:animation];
     
     [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [[self zxp_heightDictionary] removeObjectForKey:zxp_heightDictionaryKey(obj)];
+        [[self p_zxp_heightDictionary] removeObjectForKey:p_zxp_heightDictionaryKey(obj)];
     }];
     
 }
 
-- (void)swizzleReloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation {
-    [self swizzleReloadSections:sections withRowAnimation:animation];
+- (void)p_zxp_swizzleReloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation {
+    [self p_zxp_swizzleReloadSections:sections withRowAnimation:animation];
     
     NSMutableArray *tempArray = [NSMutableArray array];
     
     [sections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
         NSUInteger section = idx;
-        [[[self zxp_heightDictionary] allKeys] enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [[[self p_zxp_heightDictionary] allKeys] enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSString *sectionString = [obj componentsSeparatedByString:@"-"].firstObject;
             
             if (section == [sectionString longLongValue]) {
@@ -987,12 +1028,28 @@ NSString *zxp_heightDictionaryKey(NSIndexPath *indexPath);
         }];
     }];
     
-    [[self zxp_heightDictionary] removeObjectsForKeys:tempArray];
+    [[self p_zxp_heightDictionary] removeObjectsForKeys:tempArray];
     
 }
 
-NSString *zxp_heightDictionaryKey(NSIndexPath *indexPath) {
+- (void)p_zxp_swizzleDeleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation {
+    [[self p_zxp_heightDictionary] removeAllObjects];
+    [self p_zxp_swizzleDeleteSections:sections withRowAnimation:animation];
+}
+
+- (void)p_zxp_swizzleDeleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation {
+    [[self p_zxp_heightDictionary] removeAllObjects];
+    [self p_zxp_swizzleDeleteRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+}
+
+#pragma mark - private -> c
+
+NSString *p_zxp_heightDictionaryKey(NSIndexPath *indexPath) {
     return [NSString stringWithFormat:@"%zi-%zi",indexPath.section,indexPath.row];
+}
+
+void p_zxp_swizzleMethodOfSelf(Class aClass,SEL sel1,SEL sel2) {
+    method_exchangeImplementations(class_getInstanceMethod(aClass, sel1), class_getInstanceMethod(aClass, sel2));
 }
 
 @end
