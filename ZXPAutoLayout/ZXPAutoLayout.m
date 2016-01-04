@@ -246,24 +246,6 @@ static NSString * const kZXPNotFloatType = @"6.9532223570234712E-310";
 
 #pragma mark 居中
 
-- (ZXPAutoLayoutMaker *(^)())xCenterInSuperview {
-    return ^() {
-        return self.xCenterByView(self.view.superview);
-    };
-}
-
-- (ZXPAutoLayoutMaker *(^)())yCenterInSuperview {
-    return ^() {
-        return self.yCenterByView(self.view.superview);
-    };
-}
-
-- (ZXPAutoLayoutMaker *(^)())centerInSuperview {
-    return ^() {
-        return self.centerByView(self.view.superview);
-    };
-}
-
 - (ZXPAutoLayoutMaker *(^)(UIView *,...))xCenterByView {
     return ^(UIView *view,...) {
         CGFloat constant = 0.0;
@@ -309,7 +291,6 @@ static NSString * const kZXPNotFloatType = @"6.9532223570234712E-310";
     return ^(UIView *view,...) {
         double constant = 0.0;
         kZXPSecondValueOfParams(view, constant);
-        NSLog(@"%f--%@",constant,va_constantString);
         [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeRight multiplier:1 constant:constant];
         return self;
     };
