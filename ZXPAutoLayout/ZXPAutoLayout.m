@@ -876,7 +876,7 @@ NSString* layoutAttributeString(NSLayoutAttribute attribute) {
 
 #pragma mark - category UITableView + ZXPCellAutoHeight
 
-static NSString * const kTableViewCellHeightDictionary = @"kTableViewCellHeightDictionary_zxp";
+static NSString * const kZXPTableViewCellHeightDictionary = @"kZXPTableViewCellHeightDictionary_zxp";
 
 NSString *p_zxp_heightDictionaryKey(NSIndexPath *indexPath);
 void p_zxp_swizzleMethodOfSelf(Class aClass,SEL sel1,SEL sel2);
@@ -949,10 +949,10 @@ void p_zxp_swizzleMethodOfSelf(Class aClass,SEL sel1,SEL sel2);
 }
 
 - (NSMutableDictionary *)p_zxp_heightDictionary {
-    NSMutableDictionary *heightDictionary = objc_getAssociatedObject(self, &kTableViewCellHeightDictionary);
+    NSMutableDictionary *heightDictionary = objc_getAssociatedObject(self, &kZXPTableViewCellHeightDictionary);
     if (!heightDictionary) {
         heightDictionary = [NSMutableDictionary dictionary];
-        objc_setAssociatedObject(self, &kTableViewCellHeightDictionary, heightDictionary, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &kZXPTableViewCellHeightDictionary, heightDictionary, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return heightDictionary;
 }
@@ -979,47 +979,59 @@ void p_zxp_swizzleMethodOfSelf(Class aClass,SEL sel1,SEL sel2);
 #pragma mark swizzle method
 
 - (void)p_zxp_swizzleReloadData {
+    if ([self p_zxp_heightDictionary].count) {
+        [[self p_zxp_heightDictionary] removeAllObjects];
+    }
     [self p_zxp_swizzleReloadData];
-    [[self p_zxp_heightDictionary] removeAllObjects];
 }
 
 - (void)p_zxp_swizzleReloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation {
-    [self p_zxp_swizzleReloadRowsAtIndexPaths:indexPaths withRowAnimation:animation];
     
-    [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [[self p_zxp_heightDictionary] removeObjectForKey:p_zxp_heightDictionaryKey(obj)];
-    }];
+    if ([self p_zxp_heightDictionary].count) {
+        [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [[self p_zxp_heightDictionary] removeObjectForKey:p_zxp_heightDictionaryKey(obj)];
+        }];
+    }
+    
+    [self p_zxp_swizzleReloadRowsAtIndexPaths:indexPaths withRowAnimation:animation];
     
 }
 
 - (void)p_zxp_swizzleReloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation {
-    [self p_zxp_swizzleReloadSections:sections withRowAnimation:animation];
     
-    NSMutableArray *tempArray = [NSMutableArray array];
-    
-    [sections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
-        NSUInteger section = idx;
-        [[[self p_zxp_heightDictionary] allKeys] enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSString *sectionString = [obj componentsSeparatedByString:@"-"].firstObject;
-            
-            if (section == [sectionString longLongValue]) {
-                [tempArray addObject:obj];
-            }
-            
+    if ([self p_zxp_heightDictionary].count) {
+        NSMutableArray *tempArray = [NSMutableArray array];
+        
+        [sections enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+            NSUInteger section = idx;
+            [[[self p_zxp_heightDictionary] allKeys] enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                NSString *sectionString = [obj componentsSeparatedByString:@"-"].firstObject;
+                
+                if (section == [sectionString longLongValue]) {
+                    [tempArray addObject:obj];
+                }
+                
+            }];
         }];
-    }];
+        
+        [[self p_zxp_heightDictionary] removeObjectsForKeys:tempArray];
+    }
     
-    [[self p_zxp_heightDictionary] removeObjectsForKeys:tempArray];
+    [self p_zxp_swizzleReloadSections:sections withRowAnimation:animation];
     
 }
 
 - (void)p_zxp_swizzleDeleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation {
-    [[self p_zxp_heightDictionary] removeAllObjects];
+    if ([self p_zxp_heightDictionary].count) {
+        [[self p_zxp_heightDictionary] removeAllObjects];
+    }
     [self p_zxp_swizzleDeleteSections:sections withRowAnimation:animation];
 }
 
 - (void)p_zxp_swizzleDeleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation {
-    [[self p_zxp_heightDictionary] removeAllObjects];
+    if ([self p_zxp_heightDictionary].count) {
+        [[self p_zxp_heightDictionary] removeAllObjects];
+    }
     [self p_zxp_swizzleDeleteRowsAtIndexPaths:indexPaths withRowAnimation:animation];
 }
 
