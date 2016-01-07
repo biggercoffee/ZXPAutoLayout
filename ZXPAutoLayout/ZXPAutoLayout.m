@@ -19,7 +19,7 @@ if ([va_constantString.lowercaseString rangeOfString:@"e-"].location != NSNotFou
 var = va_arg(vaListParam, int); \
 } \
 va_constantString = [NSString stringWithFormat:@"%@",@(var)];\
-if (va_constantString.length >= 9) {\
+if (va_constantString.length >= 6) {\
 var = 0.0;\
 }\
 va_end(vaListParam) \
