@@ -14,13 +14,10 @@
 va_list vaListParam; \
 va_start(vaListParam, firstParam); \
 var = va_arg(vaListParam, double); \
-NSString *va_constantString = [NSString stringWithFormat:@"%@",@(var)]; \
-if ([va_constantString.lowercaseString rangeOfString:@"e-"].location != NSNotFound) { \
-var = va_arg(vaListParam, int); \
-} \
-va_constantString = [NSString stringWithFormat:@"%@",@(var)];\
-if (va_constantString.length >= 6) {\
-var = 0.0;\
+NSString *va_temp_string = [NSString stringWithFormat:@"%.2f",var];\
+int va_temp_int_param = va_arg(vaListParam, int); \
+if ([va_temp_string floatValue] == 0 && va_temp_int_param < 100000) { \
+    var = va_temp_int_param;\
 }\
 va_end(vaListParam) \
 
@@ -28,7 +25,6 @@ va_end(vaListParam) \
 static NSString * const kZXPAutoLayoutMakerAdd = @"ZXPAutoLayoutMakerAdd-zxp";
 static NSString * const kZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate-zxp";
 static NSString * const kZXPAttributeKey = @"ZXPAttributeKey-zxp";
-static NSString * const kZXPNotFloatType = @"6.9532223570234712E-310";
 
 #pragma mark - private category of array
 

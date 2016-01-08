@@ -116,7 +116,7 @@
     label.text = @"这是文字自适应, 这是文字自适应 ,这是文字自适应 .这是文字自适应";
     [label zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
         //设置上边距在grayView的下边,并且加10的距离
-        layout.leftSpaceEqualTo(grayView,10);
+        layout.leftSpaceEqualTo(grayView,50.0);
         
         layout.bottomSpace(20); //设置在superview里的下边距
         
