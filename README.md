@@ -10,6 +10,9 @@
 >    [tableView dequeueReusableCellWithIdentifier:cellid forIndexPath:indexPath]; 
 >    会造成野指针错误
 
+
+###这几天在添加可变参数, 版本可能不稳定, 请大家尽量使用1.2.3版本
+
 #什么是ZXPAutoLayout ?
 
 <font size=4>
