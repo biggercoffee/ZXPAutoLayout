@@ -5,7 +5,7 @@
  
  ***************** ***************** ***************** *****************
  
- version : 1.3.2
+ version : 1.3.3
  support : Xcode7.0以上 , iOS 7 以上
  简洁方便的autolayout, 打造天朝最优, 最简洁方便, 最容易上手的autolayout
  有任何问题或者需要改善交流的 可在 csdn博客或者github里给我提问题也可以联系我本人QQ
@@ -82,11 +82,11 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 /*
  居中操作,\
  第一个参数是参考某一个view进行居中
- 第二个参数是参考某一个view居中过后在加上多少距离, 可不写.默认为0. 因为这是一个可变参数. 接收整形和浮点型
+ 第二个参数是参考某一个view居中过后在加上多少距离, 可不写.默认为0. 因为这是一个可变参数. 接收浮点型
  公式: 居中(第一个参数) + 值(第二个参数)
  例子:
  layout.centerByView(superview); //在父视图中居中
- layout.centerByView(superview,100);//在父视图中居中并且x,y在累加100的距离
+ layout.centerByView(superview,100.0);//在父视图中居中并且x,y在累加100的距离
  其他用法同上~!
  */
 //参考某一个view进行水平居中
@@ -97,16 +97,16 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 @property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^centerByView)(UIView *view,...);
 
 /*
- 边距和宽高带有 EqualTo 或者 ByView 结尾的方法都带有两个参数.第二个参数是一个可变参数,只会取可变参数里的第一个值也就是所谓的第二个参数. 接收整形和浮点型
+ 边距和宽高带有 EqualTo 或者 ByView 结尾的方法都带有两个参数.第二个参数是一个可变参数,只会取可变参数里的第一个值也就是所谓的第二个参数. 接收浮点型
  第一个参数为其他view
- 第二个参数为在此基础之上累加的数值, 可传递可不传递,默认0. 接收整形和浮点型
+ 第二个参数为在此基础之上累加的数值, 可传递可不传递,默认0. 接收浮点型
  公式: view(第一个参数) + 值(第二个参数)
  */
 
 /*
  设置距离其它view的间距, 两个参数
  @param view  其它view
- @param ... 距离多少间距,这是一个可变参数. 可不写,默认为0. 也可以手动传递,接收整形和浮点型
+ @param ... 距离多少间距,这是一个可变参数. 可不写,默认为0. 也可以手动传递,接收浮点型
  公式: view(第一个参数) + 值(第二个参数)
  
  例子:

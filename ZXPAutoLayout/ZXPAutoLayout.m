@@ -15,9 +15,10 @@ va_list vaListParam; \
 va_start(vaListParam, firstParam); \
 var = va_arg(vaListParam, double); \
 NSString *va_temp_string = [NSString stringWithFormat:@"%.2f",var];\
+var = [va_temp_string floatValue];\
 int va_temp_int_param = va_arg(vaListParam, int); \
-if ([va_temp_string floatValue] == 0 && va_temp_int_param < 100000) { \
-    var = va_temp_int_param;\
+if (var == 0 && va_temp_int_param > 0 && va_temp_int_param < 100000) { \
+var = va_temp_int_param;\
 }\
 va_end(vaListParam) \
 
