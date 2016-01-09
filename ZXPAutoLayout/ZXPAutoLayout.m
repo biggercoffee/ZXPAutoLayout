@@ -7,21 +7,7 @@
 //
 
 #import "ZXPAutoLayout.h"
-
 #import <objc/runtime.h>
-
-#define kZXPSecondValueOfParams(firstParam,var) \
-va_list vaListParam; \
-va_start(vaListParam, firstParam); \
-var = va_arg(vaListParam, double); \
-NSString *va_temp_string = [NSString stringWithFormat:@"%.2f",var];\
-var = [va_temp_string floatValue];\
-int va_temp_int_param = va_arg(vaListParam, int); \
-if (var == 0 && va_temp_int_param > 0 && va_temp_int_param < 100000) { \
-var = va_temp_int_param;\
-}\
-va_end(vaListParam) \
-
 
 static NSString * const kZXPAutoLayoutMakerAdd = @"ZXPAutoLayoutMakerAdd-zxp";
 static NSString * const kZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate-zxp";
@@ -164,7 +150,7 @@ static NSString * const kZXPAttributeKey = @"ZXPAttributeKey-zxp";
     
     NSString *methodName = NSStringFromSelector(_cmd);
     if ([methodName isEqualToString:@"center"]) {
-        return self.centerByView(self.view.superview);
+        return self.centerByView(self.view.superview,0);
     }
     
     //remove tempRelatedConstraints
@@ -243,29 +229,23 @@ static NSString * const kZXPAttributeKey = @"ZXPAttributeKey-zxp";
 
 #pragma mark 居中
 
-- (ZXPAutoLayoutMaker *(^)(UIView *,...))xCenterByView {
-    return ^(UIView *view,...) {
-        CGFloat constant = 0.0;
-        kZXPSecondValueOfParams(view, constant);
-        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeCenterX multiplier:1 constant:constant];
+- (ZXPAutoLayoutMaker *(^)(UIView *,CGFloat))xCenterByView {
+    return ^(UIView *view,CGFloat value) {
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeCenterX multiplier:1 constant:value];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *,...))yCenterByView {
-    return ^(UIView *view,...) {
-        CGFloat constant = 0.0;
-        kZXPSecondValueOfParams(view, constant);
-        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeCenterY multiplier:1 constant:constant];
+- (ZXPAutoLayoutMaker *(^)(UIView *,CGFloat))yCenterByView {
+    return ^(UIView *view,CGFloat value) {
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeCenterY multiplier:1 constant:value];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *,...))centerByView {
-    return ^(UIView *view,...) {
-        CGFloat constant = 0.0;
-        kZXPSecondValueOfParams(view, constant);
-        return self.xCenterByView(view,constant).yCenterByView(view,constant);
+- (ZXPAutoLayoutMaker *(^)(UIView *,CGFloat))centerByView {
+    return ^(UIView *view,CGFloat value) {
+        return self.xCenterByView(view,value).yCenterByView(view,value);
     };
 }
 
@@ -275,76 +255,60 @@ static NSString * const kZXPAttributeKey = @"ZXPAttributeKey-zxp";
  @param value 距离多少间距
  */
 
-- (ZXPAutoLayoutMaker *(^)(UIView *, ...))topSpaceByView {
-    return ^(UIView *view,...) {
-        CGFloat constant = 0.0;
-        kZXPSecondValueOfParams(view, constant);
-        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeBottom multiplier:1 constant:constant];
+- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))topSpaceByView {
+    return ^(UIView *view,CGFloat value) {
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeBottom multiplier:1 constant:value];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *, ...))leftSpaceByView {
-    return ^(UIView *view,...) {
-        double constant = 0.0;
-        kZXPSecondValueOfParams(view, constant);
-        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeRight multiplier:1 constant:constant];
+- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))leftSpaceByView {
+    return ^(UIView *view,CGFloat value) {
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeRight multiplier:1 constant:value];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *, ...))bottomSpaceByView {
-    return ^(UIView *view,...) {
-        CGFloat constant = 0.0;
-        kZXPSecondValueOfParams(view, constant);
-        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeTop multiplier:1 constant:constant];
+- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))bottomSpaceByView {
+    return ^(UIView *view,CGFloat value) {
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeTop multiplier:1 constant:value];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *, ...))rightSpaceByView {
-    return ^(UIView *view,...) {
-        CGFloat constant = 0.0;
-        kZXPSecondValueOfParams(view, constant);
-        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeLeft multiplier:1 constant:constant];
+- (ZXPAutoLayoutMaker *(^)(UIView *,CGFloat))rightSpaceByView {
+    return ^(UIView *view,CGFloat value) {
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeLeft multiplier:1 constant:value];
         return self;
     };
 }
 
 #pragma mark 设置距离与其他view相等
 
-- (ZXPAutoLayoutMaker *(^)(UIView *, ...))topSpaceEqualTo {
-    return ^(UIView *view,...) {
-        CGFloat constant = 0.0;
-        kZXPSecondValueOfParams(view, constant);
-        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeTop multiplier:1 constant:constant];
+- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))topSpaceEqualTo {
+    return ^(UIView *view,CGFloat value) {
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeTop multiplier:1 constant:value];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *, ...))leftSpaceEqualTo {
-    return ^(UIView *view,...) {
-        CGFloat constant = 0.0;
-        kZXPSecondValueOfParams(view, constant);
-        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeLeft multiplier:1 constant:constant];
+- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))leftSpaceEqualTo {
+    return ^(UIView *view,CGFloat value) {
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeLeft multiplier:1 constant:value];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *, ...))bottomSpaceEqualTo {
-    return ^(UIView *view,...) {
-        CGFloat constant = 0.0;
-        kZXPSecondValueOfParams(view, constant);
-        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeBottom multiplier:1 constant:constant];
+- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))bottomSpaceEqualTo {
+    return ^(UIView *view,CGFloat value) {
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeBottom multiplier:1 constant:value];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *, ...))rightSpaceEqualTo {
-    return ^(UIView *view,...) {
-        CGFloat constant = 0.0;
-        kZXPSecondValueOfParams(view, constant);
-        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeRight multiplier:1 constant:constant];
+- (ZXPAutoLayoutMaker *(^)(UIView *, CGFloat))rightSpaceEqualTo {
+    return ^(UIView *view,CGFloat value) {
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeRight multiplier:1 constant:value];
         return self;
     };
 }
@@ -365,20 +329,16 @@ static NSString * const kZXPAttributeKey = @"ZXPAttributeKey-zxp";
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *,...))widthEqualTo {
-    return ^(UIView *view,...) {
-        CGFloat constant = 0.0;
-        kZXPSecondValueOfParams(view, constant);
-        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeWidth multiplier:1 constant:constant];
+- (ZXPAutoLayoutMaker *(^)(UIView *,CGFloat))widthEqualTo {
+    return ^(UIView *view,CGFloat value) {
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeWidth multiplier:1 constant:value];
         return self;
     };
 }
 
-- (ZXPAutoLayoutMaker *(^)(UIView *,...))heightEqualTo {
-    return ^(UIView *view,...) {
-        CGFloat constant = 0.0;
-        kZXPSecondValueOfParams(view, constant);
-        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeHeight multiplier:1 constant:constant];
+- (ZXPAutoLayoutMaker *(^)(UIView *,CGFloat))heightEqualTo {
+    return ^(UIView *view,CGFloat value) {
+        [self p_addOrUpdateConstraintWithFristView:self.view firstAttribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual secondView:view secondAttribute:NSLayoutAttributeHeight multiplier:1 constant:value];
         return self;
     };
 }

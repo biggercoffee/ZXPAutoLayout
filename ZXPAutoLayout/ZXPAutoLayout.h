@@ -5,7 +5,7 @@
  
  ***************** ***************** ***************** *****************
  
- version : 1.3.3
+ version : 1.3.4
  support : Xcode7.0以上 , iOS 7 以上
  简洁方便的autolayout, 打造天朝最优, 最简洁方便, 最容易上手的autolayout
  有任何问题或者需要改善交流的 可在 csdn博客或者github里给我提问题也可以联系我本人QQ
@@ -82,22 +82,21 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 /*
  居中操作,\
  第一个参数是参考某一个view进行居中
- 第二个参数是参考某一个view居中过后在加上多少距离, 可不写.默认为0. 因为这是一个可变参数. 接收浮点型
- 公式: 居中(第一个参数) + 值(第二个参数)
+ 第二个参数是参考某一个view居中过后在加上多少距离
  例子:
  layout.centerByView(superview); //在父视图中居中
  layout.centerByView(superview,100.0);//在父视图中居中并且x,y在累加100的距离
  其他用法同上~!
  */
 //参考某一个view进行水平居中
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^xCenterByView)(UIView *view,...);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^xCenterByView)(UIView *view,CGFloat value);
 //参考某一个view进行垂直居中
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^yCenterByView)(UIView *view,...);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^yCenterByView)(UIView *view,CGFloat value);
 //参考某一个view进行居中
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^centerByView)(UIView *view,...);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^centerByView)(UIView *view,CGFloat value);
 
 /*
- 边距和宽高带有 EqualTo 或者 ByView 结尾的方法都带有两个参数.第二个参数是一个可变参数,只会取可变参数里的第一个值也就是所谓的第二个参数. 接收浮点型
+ 边距和宽高带有 EqualTo 或者 ByView 结尾的方法都带有两个参数.
  第一个参数为其他view
  第二个参数为在此基础之上累加的数值, 可传递可不传递,默认0. 接收浮点型
  公式: view(第一个参数) + 值(第二个参数)
@@ -106,7 +105,7 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 /*
  设置距离其它view的间距, 两个参数
  @param view  其它view
- @param ... 距离多少间距,这是一个可变参数. 可不写,默认为0. 也可以手动传递,接收浮点型
+ @param ... 距离多少间距
  公式: view(第一个参数) + 值(第二个参数)
  
  例子:
@@ -114,34 +113,33 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
  layout.topSpaceByView(otherView,100);//上边距离参考其他view, 也就是在某一个view的下边并且在累加100的距离
  其他用法同上~!
  */
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^topSpaceByView)(UIView *view,...);
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^leftSpaceByView)(UIView *view,...);
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^bottomSpaceByView)(UIView *view,...);
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^rightSpaceByView)(UIView *view,...);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^topSpaceByView)(UIView *view,CGFloat value);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^leftSpaceByView)(UIView *view,CGFloat value);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^bottomSpaceByView)(UIView *view,CGFloat value);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^rightSpaceByView)(UIView *view,CGFloat value);
 
 /*
  @param view 设置view的距离参照与某一个view.有两个参数, 第一个是view, 第二个是value
  @param ...第二个参数
- 可不写,默认为0. 也可以手动传递,接收整形和浮点型
  如果第二个参数value 为0, 则距离等同于参照view的距离.
  如果第二个参数value不为0, 则在参照的view的基础之上加上这个参数的值
  公式 : 其他view的距离 + value
  例子: 同上~!
  */
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^topSpaceEqualTo)(UIView *view,...);
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^leftSpaceEqualTo)(UIView *view,...);
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^bottomSpaceEqualTo)(UIView *view,...);
-@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^rightSpaceEqualTo)(UIView *view,...);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^topSpaceEqualTo)(UIView *view,CGFloat value);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^leftSpaceEqualTo)(UIView *view,CGFloat value);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^bottomSpaceEqualTo)(UIView *view,CGFloat value);
+@property (copy, nonatomic, readonly) ZXPAutoLayoutMaker *(^rightSpaceEqualTo)(UIView *view,CGFloat value);
 
 /*
  设置宽高与其他view相等
  公式 : 其他view的宽或者高 + value
  @param view  其它view
- @param ... 值, 可不写,默认为0. 也可以手动传递,接收整形和浮点型
+ @param value 在参照的view的基础之上加上这个参数的值
  例子: 同上~!
  */
-@property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^widthEqualTo)(UIView *view,...);
-@property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^heightEqualTo)(UIView *view,...);
+@property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^widthEqualTo)(UIView *view,CGFloat value);
+@property (copy,nonatomic,readonly) ZXPAutoLayoutMaker *(^heightEqualTo)(UIView *view,CGFloat value);
 
 /*
  设置宽高

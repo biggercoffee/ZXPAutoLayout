@@ -93,7 +93,7 @@
     [greenView zxp_addConstraints:^(ZXPAutoLayoutMaker *layout) {
         layout.widthValue(40).heightValue(40); //设置宽高
         //在superview里保持居中
-        layout.centerByView(greenView.superview);
+        layout.centerByView(greenView.superview,0);
         
         //如果要在blueview里保持居中写成如下即可.
         //注意如下代码打开的话,请把以上居中代码给注释掉,不然会有约束冲突
