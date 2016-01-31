@@ -1,6 +1,6 @@
 # ZXPAutoLayout
 ## 方便简洁的ios自动布局
-## 此处简单入门但也足以, 如需深入一点了解, 可以查看这篇博文, 详细讲解了ZXPAutoLayout的使用 : [http://blog.csdn.net/biggercoffee/article/details/50136839](http://blog.csdn.net/biggercoffee/article/details/50136839)
+## 此处简单入门但也足以, 如需深入一点了解, 可以查看这篇博文, 详细讲解了ZXPAutoLayout的使用 : [http://www.jianshu.com/p/0ed897e93909](http://www.jianshu.com/p/0ed897e93909)
 ## v1.1.0版本已加入一行搞定`cell的自适应高度`,只需要调用`zxp_cellHeightWithindexPath:`方法即可.详情看demo.
 > cell自适应注意:在tableView: cellForRowAtIndexPath: 方法里请用
 >    [tableView dequeueReusableCellWithIdentifier:cellid];
