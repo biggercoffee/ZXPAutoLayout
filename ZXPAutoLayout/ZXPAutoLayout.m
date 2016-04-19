@@ -845,7 +845,7 @@ void p_zxp_swizzleMethodOfSelf(Class aClass,SEL sel1,SEL sel2);
     p_zxp_swizzleMethodOfSelf([self class], @selector(reloadData), @selector(p_zxp_swizzleReloadData));
     p_zxp_swizzleMethodOfSelf([self class],@selector(reloadRowsAtIndexPaths:withRowAnimation:),@selector(p_zxp_swizzleReloadRowsAtIndexPaths:withRowAnimation:));
     p_zxp_swizzleMethodOfSelf([self class],@selector(reloadSections:withRowAnimation:),@selector(p_zxp_swizzleReloadSections:withRowAnimation:));
-    p_zxp_swizzleMethodOfSelf([self class],@selector(deleteSections:withRowAnimation:),@selector(p_zxp_swizzleReloadSections:withRowAnimation:));
+    p_zxp_swizzleMethodOfSelf([self class],@selector(deleteSections:withRowAnimation:),@selector(p_zxp_swizzleDeleteSections:withRowAnimation:));
     p_zxp_swizzleMethodOfSelf([self class],@selector(deleteRowsAtIndexPaths:withRowAnimation:),@selector(p_zxp_swizzleDeleteRowsAtIndexPaths:withRowAnimation:));
 }
 
