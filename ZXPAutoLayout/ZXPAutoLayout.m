@@ -727,7 +727,7 @@ static NSString * const kZXPAttributeKey = @"ZXPAttributeKey-zxp";
 - (void)resetAttributeWithView:(UIView *)view {
     NSLayoutAttribute secondAttribute = [objc_getAssociatedObject(view, &kZXPAttributeKey) integerValue];
     if ( secondAttribute != NSLayoutAttributeNotAnAttribute ) {
-        objc_setAssociatedObject(view, &kZXPAttributeKey, @(NSLayoutAttributeNotAnAttribute), OBJC_ASSOCIATION_ASSIGN);
+        objc_setAssociatedObject(view, &kZXPAttributeKey, @(NSLayoutAttributeNotAnAttribute), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
 }
 
@@ -738,52 +738,52 @@ static NSString * const kZXPAttributeKey = @"ZXPAttributeKey-zxp";
 @implementation UIView (ZXPAdditions)
 
 - (id)zxp_top {
-    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeTop), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeTop), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return self;
 }
 
 - (id)zxp_left {
-    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeLeft), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeLeft), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return self;
 }
 
 - (id)zxp_bottom {
-    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeBottom), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeBottom), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return self;
 }
 
 - (id)zxp_right {
-    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeRight), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeRight), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return self;
 }
 
 - (id)zxp_leading {
-    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeLeading), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeLeading), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return self;
 }
 
 - (id)zxp_trailing {
-    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeTrailing), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeTrailing), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return self;
 }
 
 - (id)zxp_width {
-    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeWidth), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeWidth), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return self;
 }
 
 - (id)zxp_height {
-    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeHeight), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeHeight), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return self;
 }
 
 - (id)zxp_centerX {
-    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeCenterX), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeCenterX), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return self;
 }
 
 - (id)zxp_centerY {
-    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeCenterY), OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &kZXPAttributeKey, @(NSLayoutAttributeCenterY), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return self;
 }
 
