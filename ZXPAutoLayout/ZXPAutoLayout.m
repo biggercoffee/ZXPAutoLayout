@@ -1,17 +1,41 @@
-//
-//  ZXPAutoLayout.m
-//  layout
-//
-//  Created by coffee on 15/10/10.
-//  Copyright © 2015年 coffee. All rights reserved.
-//
 
 #import "ZXPAutoLayout.h"
 #import <objc/runtime.h>
 
-static NSString * const kZXPAutoLayoutMakerAdd = @"ZXPAutoLayoutMakerAdd-zxp";
-static NSString * const kZXPAutoLayoutMakerUpdate = @"ZXPAutoLayoutMakerUpdate-zxp";
-static NSString * const kZXPAttributeKey = @"ZXPAttributeKey-zxp";
+#pragma mark - NSLayoutAttribute convert string
+
+NSString* p_zxp_layoutAttributeString(NSLayoutAttribute attribute) {
+    NSString *attributeString;
+#define enumToString(value) case value : attributeString = @#value; break;
+    switch (attribute) {
+            enumToString(NSLayoutAttributeLeft)
+            enumToString(NSLayoutAttributeRight)
+            enumToString(NSLayoutAttributeTop)
+            enumToString(NSLayoutAttributeBottom)
+            enumToString(NSLayoutAttributeLeading)
+            enumToString(NSLayoutAttributeTrailing)
+            enumToString(NSLayoutAttributeWidth)
+            enumToString(NSLayoutAttributeHeight)
+            enumToString(NSLayoutAttributeCenterX)
+            enumToString(NSLayoutAttributeCenterY)
+        default:
+            enumToString(NSLayoutAttributeNotAnAttribute)
+    }
+#undef enumToString
+    return attributeString;
+}
+
+#pragma mark - end NSLayoutAttribute convert string
+
+static NSString * const kZXPAutoLayoutMakerAdd       = @"ZXPAutoLayoutMakerAdd-zxp";
+static NSString * const kZXPAutoLayoutMakerUpdate    = @"ZXPAutoLayoutMakerUpdate-zxp";
+static NSString * const kZXPAttributeKey             = @"ZXPAttributeKey-zxp";
+
+static NSString * const kZXPAutoLayoutForArrayObject = @"kZXPAutoLayoutForArrayObject-zxp";
+static void * kZXPAutoLayoutForArrayKey              = &kZXPAutoLayoutForArrayKey;
+
+static NSString * const kZXPAutoLayoutForArrayForLockObject = @"kZXPAutoLayoutForArrayForLockObject-zxp";
+static void * kZXPAutoLayoutForArrayForLockKey              = &kZXPAutoLayoutForArrayForLockKey;
 
 #pragma mark - private category of array
 
@@ -79,6 +103,29 @@ static NSString * const kZXPAttributeKey = @"ZXPAttributeKey-zxp";
 
 @end
 
+#pragma mark - ZXPAutoLayoutFactory class
+
+@interface ZXPAutoLayoutFactory ()
+
+@property (nonatomic, assign) CGFloat            layoutConstant;
+@property (nonatomic, assign) UILayoutPriority   layoutPriority;
+@property (nonatomic, assign) NSLayoutAttribute  layoutFirstAttribute;
+@property (nonatomic, assign) NSLayoutAttribute  layoutSecondAttribute;
+@property (nonatomic, assign) CGFloat            layoutMultiplierValue;
+@property (nonatomic, assign) BOOL               layoutAutoHeight;
+@property (nonatomic, assign) BOOL               layoutAutoWidth;
+@property (nonatomic,strong ) UIView             *layoutSecondView;
+@property (nonatomic,copy   ) NSArray<ZXPAutoLayoutFactory *> *layoutCenters;
+@property (nonatomic,copy   ) NSArray<ZXPAutoLayoutFactory *> *layoutInsets;
+@property (nonatomic,strong) ZXPAutoLayoutMaker *marker;
+
+@property (nonatomic, assign) BOOL               widthEqualToHeight;
+@property (nonatomic, assign) BOOL               heightEqualToWidth;
+
++ (void)p_layoutMakerLockWithBlock:(void(^)(void))block;
+
+@end
+
 #pragma mark - ZXPAutoLayoutMaker class
 
 @interface ZXPAutoLayoutMaker ()
@@ -89,7 +136,7 @@ static NSString * const kZXPAttributeKey = @"ZXPAttributeKey-zxp";
 
 @property (nonatomic,strong) UIView *view;
 @property (nonatomic,strong) NSLayoutConstraint *lastConstraint;
-@property (nonatomic,assign) id layoutType;
+@property (nonatomic,copy) NSString *layoutType;
 
 @end
 
@@ -615,10 +662,7 @@ static NSString * const kZXPAttributeKey = @"ZXPAttributeKey-zxp";
 
 - (ZXPAutoLayoutMaker *)setupConstraint:(CGFloat)offset relatedBy:(NSLayoutRelation)related multiplierBy:(CGFloat)multiplier {
     
-    if (!self.view.superview) {
-        NSAssert(NO, @"%@ , not superview",self.view.class);
-        return self;
-    }
+    NSAssert(self.view.superview, @"%@ , not superview",self.view.class);
     
     if (self.tempRelatedConstraints.count) {
         
@@ -676,10 +720,7 @@ static NSString * const kZXPAttributeKey = @"ZXPAttributeKey-zxp";
 
 - (ZXPAutoLayoutMaker *)reAddConstraintOfAttributesWithToItem:(UIView *)secondView relatedBy:(NSLayoutRelation)related multiplierBy:(CGFloat)multiplier {
     
-    if (!self.view.superview) {
-        NSAssert(NO, @"%@ , not superview",self.view.class);
-        return self;
-    }
+    NSAssert(self.view.superview, @"%@ , please add superview",self.view.class);
     
     NSArray *distinctUnionAttributes = [self.constraintAttributes distinctUnionOfObjects];
     NSLayoutAttribute secondAttribute = [objc_getAssociatedObject(secondView, &kZXPAttributeKey) integerValue];
@@ -732,8 +773,6 @@ static NSString * const kZXPAttributeKey = @"ZXPAttributeKey-zxp";
 }
 
 @end
-
-#pragma mark - public category of view
 
 @implementation UIView (ZXPAdditions)
 
@@ -803,30 +842,175 @@ static NSString * const kZXPAttributeKey = @"ZXPAttributeKey-zxp";
     [array addObjectsFromArray:superConstrain];
     [array enumerateObjectsUsingBlock:^(__kindof NSLayoutConstraint * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if (obj.firstItem == self) {
-            NSLog(@"%@ -> %@ : %f",[self class],layoutAttributeString(obj.firstAttribute),obj.constant);
+            NSLog(@"%@ -> %@ : %f",[self class],p_zxp_layoutAttributeString(obj.firstAttribute),obj.constant);
         }
     }];
 }
 
-NSString* layoutAttributeString(NSLayoutAttribute attribute) {
-    NSString *attributeString;
-#define enumToString(value) case value : attributeString = @#value; break;
-    switch (attribute) {
-            enumToString(NSLayoutAttributeLeft)
-            enumToString(NSLayoutAttributeRight)
-            enumToString(NSLayoutAttributeTop)
-            enumToString(NSLayoutAttributeBottom)
-            enumToString(NSLayoutAttributeLeading)
-            enumToString(NSLayoutAttributeTrailing)
-            enumToString(NSLayoutAttributeWidth)
-            enumToString(NSLayoutAttributeHeight)
-            enumToString(NSLayoutAttributeCenterX)
-            enumToString(NSLayoutAttributeCenterY)
-        default:
-            enumToString(NSLayoutAttributeNotAnAttribute)
+#pragma mark 2.0+ 全新API
+
+- (void)zxp_addAutoLayouts:(void(^)(void))block {
+    [ZXPAutoLayoutFactory p_layoutMakerLockWithBlock:block];
+    [self p_zxp_autoLayoutsWithType:kZXPAutoLayoutMakerAdd];
+}
+
+- (void)zxp_updateAutoLayouts:(void (^)(void))block {
+    [ZXPAutoLayoutFactory p_layoutMakerLockWithBlock:block];
+    [self p_zxp_autoLayoutsWithType:kZXPAutoLayoutMakerUpdate];
+}
+
+- (CGFloat)zxp_fittingWidthWithSubview:(UIView *)view {
+    return [self p_zxp_fittingSizeWithSubview:view].width;
+}
+
+- (CGFloat)zxp_fittingHeightWithSubview:(UIView *)view {
+    return [self p_zxp_fittingSizeWithSubview:view].height;
+}
+
+#pragma mark 2.0+ private
+
+- (CGSize)p_zxp_fittingSizeWithSubview:(UIView *)view {
+    if ((![view isDescendantOfView:self]) || view == self) {
+        return CGSizeZero;
     }
-#undef enumToString
-    return attributeString;
+    [self layoutIfNeeded];
+    return CGSizeMake(CGRectGetMaxX(view.frame), CGRectGetMaxY(view.frame));
+}
+
+- (void)p_zxp_addAutoLayoutsWithArray:(NSArray<ZXPAutoLayoutFactory *> *)layouts {
+    [self p_zxp_autolayoutWithType:kZXPAutoLayoutMakerAdd makers:layouts];
+}
+
+- (void)p_zxp_updateAutoLayoutsWithArray:(NSArray<ZXPAutoLayoutFactory *> *)layouts {
+    [self p_zxp_autolayoutWithType:kZXPAutoLayoutMakerUpdate makers:layouts];
+}
+
+- (void)p_zxp_autoLayoutsWithType:(NSString *)type {
+    NSArray<ZXPAutoLayoutFactory *> *factories = objc_getAssociatedObject(kZXPAutoLayoutForArrayObject, kZXPAutoLayoutForArrayKey);
+    
+    if (type == kZXPAutoLayoutMakerAdd) {
+        [self p_zxp_addAutoLayoutsWithArray:factories];
+    }
+    else {
+        [self p_zxp_updateAutoLayoutsWithArray:factories];
+    }
+    
+    objc_setAssociatedObject(kZXPAutoLayoutForArrayObject, kZXPAutoLayoutForArrayKey, nil, OBJC_ASSOCIATION_ASSIGN);
+    factories = nil;
+}
+
+- (void)p_zxp_autolayoutWithType:(NSString *)type makers:(NSArray<ZXPAutoLayoutFactory *> *)makers {
+    self.translatesAutoresizingMaskIntoConstraints = NO;
+    
+    [makers enumerateObjectsUsingBlock:^(ZXPAutoLayoutFactory * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        @autoreleasepool {
+            ZXPAutoLayoutMaker *maker = [[ZXPAutoLayoutMaker alloc] initWithView:self type:type];
+            if (obj.widthEqualToHeight) {
+#pragma clang diagnostic ignored"-Wdeprecated-declarations"
+                maker.width.equalTo(obj.layoutSecondView.zxp_height).offset(obj.layoutConstant);
+            }
+            else if (obj.heightEqualToWidth) {
+                maker.height.equalTo(obj.layoutSecondView.zxp_width).offset(obj.layoutConstant);
+#pragma clang diagnostic pop
+            }
+            else if (obj.layoutAutoHeight) {
+                maker.autoHeight(obj.layoutConstant);
+            }
+            else if (obj.layoutAutoWidth) {
+                maker.autoWidth(obj.layoutConstant);
+            }
+            else if (obj.layoutSecondView) {
+                
+                SEL aSel = nil;
+                
+                if (obj.layoutSecondAttribute == NSLayoutAttributeNotAnAttribute) {
+                    aSel = NSSelectorFromString(p_zxp_layout_equalTo_method()[@(obj.layoutFirstAttribute)]);
+                }
+                else {
+                    aSel = NSSelectorFromString(p_zxp_layout_spaceByView_method()[@(obj.layoutFirstAttribute)]);
+                }
+                
+                void(^block)()        = [self p_zxp_makerLayoutGetterBlock_:maker sel:aSel];
+                if (block) {
+                    block(obj.layoutSecondView,obj.layoutConstant);
+                }
+                
+                if (obj.layoutMultiplierValue) {
+                    maker.multiplier(obj.layoutMultiplierValue);
+                }
+            }
+            else if (obj.layoutCenters) {
+                if (type == kZXPAutoLayoutMakerAdd) {
+                    [self p_zxp_addAutoLayoutsWithArray:obj.layoutCenters];
+                }
+                else {
+                    [self p_zxp_updateAutoLayoutsWithArray:obj.layoutCenters];
+                }
+            }
+            else if (obj.layoutInsets) {
+                if (type == kZXPAutoLayoutMakerAdd) {
+                    [self p_zxp_addAutoLayoutsWithArray:obj.layoutInsets];
+                }
+                else {
+                    [self p_zxp_updateAutoLayoutsWithArray:obj.layoutInsets];
+                }
+            }
+            else {
+                
+                SEL aSel       = NSSelectorFromString(p_zxp_layout_space_method()[@(obj.layoutFirstAttribute)]);
+                void(^block)() = [self p_zxp_makerLayoutGetterBlock_:maker sel:aSel];
+                if (block) {
+                    block(obj.layoutConstant);
+                }
+            }
+            
+            if (obj.layoutPriority) {
+                maker.priority(obj.layoutPriority);
+            }
+        }
+    }];
+}
+
+- (void(^)())p_zxp_makerLayoutGetterBlock_:(NSObject *)obj sel:(SEL)aSel {
+    if (aSel && class_respondsToSelector([obj class],aSel)) {
+        IMP aImp              = [obj methodForSelector:aSel];
+        id (*execIMP)(id,SEL) = (void *)aImp;
+        return ((void(^)())execIMP(obj,aSel));
+    }
+    return nil;
+}
+
+NSDictionary<NSNumber *,NSString *> *p_zxp_layout_space_method() {
+    return @{
+             @(NSLayoutAttributeTop):@"topSpace",
+             @(NSLayoutAttributeLeft):@"leftSpace",
+             @(NSLayoutAttributeRight):@"rightSpace",
+             @(NSLayoutAttributeBottom):@"bottomSpace",
+             @(NSLayoutAttributeWidth):@"widthValue",
+             @(NSLayoutAttributeHeight):@"heightValue",
+             };
+}
+
+NSDictionary<NSNumber *,NSString *> *p_zxp_layout_equalTo_method() {
+    return @{
+             @(NSLayoutAttributeTop):@"topSpaceEqualTo",
+             @(NSLayoutAttributeLeft):@"leftSpaceEqualTo",
+             @(NSLayoutAttributeRight):@"rightSpaceEqualTo",
+             @(NSLayoutAttributeBottom):@"bottomSpaceEqualTo",
+             @(NSLayoutAttributeWidth):@"widthEqualTo",
+             @(NSLayoutAttributeHeight):@"heightEqualTo"
+             };
+}
+
+NSDictionary<NSNumber *,NSString *> *p_zxp_layout_spaceByView_method() {
+    return @{
+             @(NSLayoutAttributeTop):@"topSpaceByView",
+             @(NSLayoutAttributeLeft):@"leftSpaceByView",
+             @(NSLayoutAttributeRight):@"rightSpaceByView",
+             @(NSLayoutAttributeBottom):@"bottomSpaceByView",
+             @(NSLayoutAttributeCenterX):@"xCenterByView",
+             @(NSLayoutAttributeCenterY):@"yCenterByView",
+             };
 }
 
 @end
@@ -1004,8 +1188,276 @@ void p_zxp_swizzleMethodOfSelf(Class aClass,SEL sel1,SEL sel2) {
 
 @end
 
+//-----------------------------------------------------
 
+@implementation ZXPAutoLayoutFactory
 
+- (ZXPAutoLayoutFactory *(^)(UILayoutPriority))priority {
+    return ^(UILayoutPriority priority) {
+        self.layoutPriority          = priority;
+        return self;
+    };
+}
+
+- (ZXPAutoLayoutFactory *(^)(CGFloat))multiplier {
+    return ^(CGFloat multiplier) {
+        self.layoutMultiplierValue = multiplier;
+        return self;
+    };
+}
+
+- (CGFloat)layoutMultiplierValue {
+    return _layoutMultiplierValue == 0 ? 1 : _layoutMultiplierValue;
+}
+
++ (void)p_layoutMakerLockWithBlock:(void (^)(void))block {
+    objc_setAssociatedObject(kZXPAutoLayoutForArrayForLockObject, kZXPAutoLayoutForArrayForLockKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    if (block) {
+        block();
+    }
+    objc_setAssociatedObject(kZXPAutoLayoutForArrayForLockObject, kZXPAutoLayoutForArrayForLockKey, nil, OBJC_ASSOCIATION_ASSIGN);
+}
+
+@end
+
+#pragma mark - 生产 zxp_layout 的C函数
+
+#pragma mark 私有
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * p_zxp_layout_maker(UIView *secondView,CGFloat constant,NSLayoutAttribute firstAttribute,NSLayoutAttribute secondAttribute) {
+    id lockLayout = objc_getAssociatedObject(kZXPAutoLayoutForArrayForLockObject, kZXPAutoLayoutForArrayForLockKey);
+    if (!lockLayout) {
+        return nil;
+    }
+    ZXPAutoLayoutMaker *layout = [[ZXPAutoLayoutMaker alloc] initWithView:nil type:kZXPAutoLayoutMakerAdd];
+    ZXPAutoLayoutFactory *factory = [ZXPAutoLayoutFactory new];
+    factory.layoutConstant = constant;
+    factory.layoutFirstAttribute = firstAttribute;
+    factory.layoutSecondView = secondView;
+    factory.layoutSecondAttribute = secondAttribute;
+    factory.marker = layout;
+    
+    NSMutableArray<ZXPAutoLayoutFactory *> *array = objc_getAssociatedObject(kZXPAutoLayoutForArrayObject, kZXPAutoLayoutForArrayKey);
+    if (array == nil) {
+        array = [NSMutableArray array];
+        objc_setAssociatedObject(kZXPAutoLayoutForArrayObject, &kZXPAutoLayoutForArrayKey, array, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    [array addObject:factory];
+    return factory;
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * p_zxp_layout_maker(UIView *secondView,CGFloat constant,NSLayoutAttribute attribute) {
+    return p_zxp_layout_maker(secondView, constant, attribute,NSLayoutAttributeNotAnAttribute);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * p_zxp_layout_maker(CGFloat constant,NSLayoutAttribute attribute) {
+    return p_zxp_layout_maker(nil, constant, attribute);
+}
+
+#pragma mark 公开
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_top(CGFloat constant) {
+    return p_zxp_layout_maker(constant,NSLayoutAttributeTop);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_left(CGFloat constant) {
+    return p_zxp_layout_maker(constant,NSLayoutAttributeLeft);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_right(CGFloat constant) {
+    return p_zxp_layout_maker(constant,NSLayoutAttributeRight);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_bottom(CGFloat constant) {
+    return p_zxp_layout_maker(constant,NSLayoutAttributeBottom);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_width(CGFloat constant) {
+    return p_zxp_layout_maker(constant, NSLayoutAttributeWidth);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_height(CGFloat constant) {
+    return p_zxp_layout_maker(constant, NSLayoutAttributeHeight);
+}
+
+ZXPAutoLayoutFactory * zxp_layout_edge(UIEdgeInsets insets) {
+    ZXPAutoLayoutFactory *layout = p_zxp_layout_maker(0, NSLayoutAttributeNotAnAttribute);
+    layout.layoutInsets = @[
+                             zxp_layout_top(insets.top),
+                             zxp_layout_left(insets.left),
+                             zxp_layout_right(insets.right),
+                             zxp_layout_bottom(insets.bottom)
+                             ];
+    return layout;
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_top(void) {
+    return zxp_layout_top(0.f);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_left(void) {
+    return zxp_layout_left(0.f);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_right(void) {
+    return zxp_layout_right(0.f);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_bottom(void) {
+    return zxp_layout_bottom(0.f);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_width(void) {
+    return zxp_layout_width(0.f);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_height(void) {
+    return zxp_layout_height(0.f);
+}
+
+ZXPAutoLayoutFactory * zxp_layout_widthGreaterThanOrEqual(CGFloat constant) {
+    ZXPAutoLayoutFactory *layout = p_zxp_layout_maker(constant, NSLayoutAttributeNotAnAttribute);
+    layout.layoutAutoWidth = YES;
+    return layout;
+}
+
+ZXPAutoLayoutFactory * zxp_layout_heightGreaterThanOrEqual(CGFloat constant) {
+    ZXPAutoLayoutFactory *layout = p_zxp_layout_maker(constant, NSLayoutAttributeNotAnAttribute);
+    layout.layoutAutoHeight = YES;
+    return layout;
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_center(UIView *secondView,CGFloat constant) {
+    ZXPAutoLayoutFactory *factory = [ZXPAutoLayoutFactory new];
+    factory.layoutCenters = @[
+                              zxp_layout_centerX(secondView, constant),
+                              zxp_layout_centerY(secondView, constant)
+                              ];
+    return factory;
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_center(UIView *secondView) {
+    return zxp_layout_center(secondView,0);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_centerX(UIView *secondView,CGFloat constant) {
+    return p_zxp_layout_maker(secondView, constant, NSLayoutAttributeCenterX, NSLayoutAttributeCenterX);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_centerX(UIView *secondView) {
+    return zxp_layout_centerX(secondView,0);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_centerY(UIView *secondView,CGFloat constant) {
+    return p_zxp_layout_maker(secondView, constant, NSLayoutAttributeCenterY, NSLayoutAttributeCenterY);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_centerY(UIView *secondView) {
+    return zxp_layout_centerY(secondView, 0);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_topEqualTo(UIView *secondView, CGFloat constant) {
+    return p_zxp_layout_maker(secondView, constant, NSLayoutAttributeTop);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_topEqualTo(UIView *secondView) {
+    return zxp_layout_topEqualTo(secondView, 0);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_leftEqualTo(UIView *secondView, CGFloat constant) {
+    return p_zxp_layout_maker(secondView, constant, NSLayoutAttributeLeft);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_leftEqualTo(UIView *secondView) {
+    return zxp_layout_leftEqualTo(secondView, 0);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_bottomEqualTo(UIView *secondView, CGFloat constant) {
+    return p_zxp_layout_maker(secondView, constant, NSLayoutAttributeBottom);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_bottomEqualTo(UIView *secondView) {
+    return zxp_layout_bottomEqualTo(secondView, 0);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_rightEqualTo(UIView *secondView, CGFloat constant) {
+    return p_zxp_layout_maker(secondView, constant, NSLayoutAttributeRight);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_rightEqualTo(UIView *secondView) {
+    return zxp_layout_rightEqualTo(secondView, 0);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_widthEqualTo(UIView *secondView, CGFloat constant) {
+    return p_zxp_layout_maker(secondView, constant, NSLayoutAttributeWidth);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_widthEqualTo(UIView *secondView) {
+    return zxp_layout_widthEqualTo(secondView, 0);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_heightEqualTo(UIView *secondView, CGFloat constant) {
+    return p_zxp_layout_maker(secondView, constant, NSLayoutAttributeHeight);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_heightEqualTo(UIView *secondView) {
+    return zxp_layout_heightEqualTo(secondView, 0);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_widthEqualToHeight(UIView *secondView, CGFloat constant) {
+    ZXPAutoLayoutFactory *factory = p_zxp_layout_maker(secondView, constant, NSLayoutAttributeNotAnAttribute);
+    factory.widthEqualToHeight = YES;
+    return factory;
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_widthEqualToHeight(UIView *secondView) {
+    return zxp_layout_widthEqualToHeight(secondView,0);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_heightEqualToWidth(UIView *secondView, CGFloat constant) {
+    ZXPAutoLayoutFactory *factory = p_zxp_layout_maker(secondView, constant, NSLayoutAttributeNotAnAttribute);
+    factory.heightEqualToWidth = YES;
+    return factory;
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_heightEqualToWidth(UIView *secondView) {
+    return zxp_layout_heightEqualToWidth(secondView,0);
+}
+
+#pragma mark 某一边距参照某一个view来设置
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_topByView(UIView *secondView, CGFloat constant) {
+    return p_zxp_layout_maker(secondView, constant, NSLayoutAttributeTop,NSLayoutAttributeBottom);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_topByView(UIView *secondView) {
+    return zxp_layout_topByView(secondView,0);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_leftByView(UIView *secondView, CGFloat constant) {
+    return p_zxp_layout_maker(secondView, constant, NSLayoutAttributeLeft, NSLayoutAttributeRight);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_leftByView(UIView *secondView) {
+    return zxp_layout_leftByView(secondView, 0);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_bottomByView(UIView *secondView, CGFloat constant) {
+    return p_zxp_layout_maker(secondView, constant, NSLayoutAttributeBottom, NSLayoutAttributeTop);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_bottomByView(UIView *secondView) {
+    return zxp_layout_bottomByView(secondView,0);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_rightByView(UIView *secondView, CGFloat constant) {
+    return p_zxp_layout_maker(secondView, constant, NSLayoutAttributeRight, NSLayoutAttributeLeft);
+}
+
+__attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_rightByView(UIView *secondView) {
+    return zxp_layout_rightByView(secondView,0);
+}
+
+#pragma mark - end 生产 zxp_layout 的C函数s
 
 
 

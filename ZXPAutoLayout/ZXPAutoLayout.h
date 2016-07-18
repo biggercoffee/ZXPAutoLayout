@@ -1,27 +1,22 @@
-//
-//  ZXPAutoLayout.h
-//  layout
+
 /*
  
  ***************** ***************** ***************** *****************
  
- version : 1.3.6
+ version : 2.0.0 - beta3
  support : Xcode7.0以上 , iOS 7 以上
  简洁方便的autolayout, 打造天朝最优, 最简洁方便, 最容易上手的autolayout
- 有任何问题或者需要改善交流的 可在 csdn博客或者github里给我提问题也可以联系我本人QQ
  github : https://github.com/biggercoffee/ZXPAutolayout
- csdn blog : http://blog.csdn.net/biggercoffee
- QQ : 974792506
+ blog : http://xiaopingblog.cn/
  Email: z_xiaoping@163.com
  
  ***************** ***************** ***************** *****************
  */
-//  Created by coffee on 15/10/10.
-//  Copyright © 2015年 coffee. All rights reserved.
-//
 
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
+
+#pragma mark - ZXPStackViewType
 
 typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
     /**
@@ -33,6 +28,8 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
      */
     ZXPStackViewTypeVertical
 };
+
+@class ZXPAutoLayoutFactory;
 
 #pragma mark - ZXPStackView class
 
@@ -253,6 +250,48 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 //print
 - (void)zxp_printConstraintsForSelf;
 
+#pragma mark - 2.0 全新的APIS
+
+/**
+ *  添加布局
+ *  示例：[view zxp_addAutoLayouts:^{
+                                     zxp_layout_center(self.view),
+                                     zxp_layout_height(100),
+                                     zxp_layout_widthEqualTo(self.view).multiplier(0.5)
+                                     }];
+ *  @param makers 装载的是ZXPAutoLayoutFactory对象，可通过 zxp_layout_xxx 函数来获取，列如zxp_layout_top | zxp_layout_left | zxp_layout_right | zxp_layout_bottom 等等，详情请参照API。(参照 ZXPAutoLayout.h 文件的最底部为可用APIS)
+ */
+- (void)zxp_addAutoLayouts:(void(^)(void))block;
+
+/**
+ *  更新布局(只能更新以添加过的约束)
+ *  示例：[view zxp_updateAutoLayouts:^{
+                                     zxp_layout_center(self.view,100),
+                                     zxp_layout_height(50),
+                                     zxp_layout_widthEqualTo(self.view).multiplier(0.8)
+                                     }];
+ *  @param makers 装载的是ZXPAutoLayoutFactory对象，可通过 zxp_layout_xxx 函数来获取，列如zxp_layout_top | zxp_layout_left | zxp_layout_right | zxp_layout_bottom 等等，详情请参照API。(参照 ZXPAutoLayout.h 文件的最底部为可用APIS)
+ */
+- (void)zxp_updateAutoLayouts:(void(^)(void))block;
+
+/**
+ *  根据子视图获取当前视图适合的高
+ *
+ *  @param view subview
+ *
+ *  @return height
+ */
+- (CGFloat)zxp_fittingHeightWithSubview:(UIView *)view;
+
+/**
+ *  根据子视图获取当前视图适合的宽
+ *
+ *  @param view subview
+ *
+ *  @return width
+ */
+- (CGFloat)zxp_fittingWidthWithSubview:(UIView *)view;
+
 @end
 
 #pragma mark - category UITableView + ZXPCellAutoHeight
@@ -325,6 +364,120 @@ typedef NS_ENUM(NSUInteger, ZXPStackViewType) {
 
 @end
 
+@interface ZXPAutoLayoutFactory : NSObject
+
+/**
+ *  优先级
+ */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutFactory *(^priority)(UILayoutPriority priority);
+
+/**
+ *  倍数
+ */
+@property (copy, nonatomic, readonly) ZXPAutoLayoutFactory *(^multiplier)(CGFloat multiplier);
+
+@end
+
+//-----------------------------------------------------
+
+#pragma mark - 生产 zxp_layout 的C函数
+
+#pragma mark 约束值
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_top(CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_left(CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_right(CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_bottom(CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_width(CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_height(CGFloat constant);
+
+extern ZXPAutoLayoutFactory * zxp_layout_edge(UIEdgeInsets insets);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_top(void);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_left(void);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_right(void);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_bottom(void);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_width(void);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_height(void);
+
+extern ZXPAutoLayoutFactory * zxp_layout_widthGreaterThanOrEqual(CGFloat constant);
+extern ZXPAutoLayoutFactory * zxp_layout_heightGreaterThanOrEqual(CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_center(UIView *secondView,CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_center(UIView *secondView);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_centerX(UIView *secondView,CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_centerX(UIView *secondView);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_centerY(UIView *secondView,CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_centerY(UIView *secondView);
+
+#pragma mark 等同于参照view的约束
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_topEqualTo(UIView *secondView, CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_topEqualTo(UIView *secondView);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_leftEqualTo(UIView *secondView, CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_leftEqualTo(UIView *secondView);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_bottomEqualTo(UIView *secondView, CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_bottomEqualTo(UIView *secondView);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_rightEqualTo(UIView *secondView, CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_rightEqualTo(UIView *secondView);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_widthEqualTo(UIView *secondView, CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_widthEqualTo(UIView *secondView);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_heightEqualTo(UIView *secondView, CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_heightEqualTo(UIView *secondView);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_widthEqualToHeight(UIView *secondView, CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_widthEqualToHeight(UIView *secondView);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_heightEqualToWidth(UIView *secondView, CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_heightEqualToWidth(UIView *secondView);
+
+#pragma mark 某一边距参照某一个view来设置
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_topByView(UIView *secondView, CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_topByView(UIView *secondView);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_leftByView(UIView *secondView, CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_leftByView(UIView *secondView);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_bottomByView(UIView *secondView, CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_bottomByView(UIView *secondView);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_rightByView(UIView *secondView, CGFloat constant);
+
+__attribute__((__overloadable__)) extern ZXPAutoLayoutFactory * zxp_layout_rightByView(UIView *secondView);
+
+#pragma mark - end 生产 zxp_layout 的C函数
 
 
 
