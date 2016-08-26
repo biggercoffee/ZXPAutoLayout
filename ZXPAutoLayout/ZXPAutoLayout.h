@@ -3,7 +3,7 @@
  
  ***************** ***************** ***************** *****************
  
- version : 2.0.0 - beta3
+ version : 2.0.1
  support : Xcode7.0以上 , iOS 7 以上
  简洁方便的autolayout, 打造天朝最优, 最简洁方便, 最容易上手的autolayout
  github : https://github.com/biggercoffee/ZXPAutolayout

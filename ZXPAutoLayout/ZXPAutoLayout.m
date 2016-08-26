@@ -611,7 +611,6 @@ static void * kZXPAutoLayoutForArrayForLockKey              = &kZXPAutoLayoutFor
         if (attribute == NSLayoutAttributeLeft) {
             if (obj.firstItem == self.view && (obj.firstAttribute == attribute || obj.firstAttribute == NSLayoutAttributeLeading)) {
                 obj.constant = constant;
-                *stop = YES;
             }
         }
         else if (attribute == NSLayoutAttributeRight) {
@@ -623,7 +622,6 @@ static void * kZXPAutoLayoutForArrayForLockKey              = &kZXPAutoLayoutFor
         else {
             if (obj.firstItem == view && obj.firstAttribute == attribute) {
                 obj.constant = constant;
-                *stop = YES;
             }
         }
     }];
@@ -1282,11 +1280,11 @@ __attribute__((__overloadable__)) ZXPAutoLayoutFactory * zxp_layout_height(CGFlo
 ZXPAutoLayoutFactory * zxp_layout_edge(UIEdgeInsets insets) {
     ZXPAutoLayoutFactory *layout = p_zxp_layout_maker(0, NSLayoutAttributeNotAnAttribute);
     layout.layoutInsets = @[
-                             zxp_layout_top(insets.top),
-                             zxp_layout_left(insets.left),
-                             zxp_layout_right(insets.right),
-                             zxp_layout_bottom(insets.bottom)
-                             ];
+                            zxp_layout_top(insets.top),
+                            zxp_layout_left(insets.left),
+                            zxp_layout_right(insets.right),
+                            zxp_layout_bottom(insets.bottom)
+                            ];
     return layout;
 }
 
