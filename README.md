@@ -50,7 +50,7 @@
 # 加入ZXPAutoLayout !
 ###  第一种方式:直接去github上下载:[https://github.com/biggercoffee/ZXPAutoLayout](https://github.com/biggercoffee/ZXPAutoLayout)
 <p></p>
-### 第二种方式: 直接在Cocoapods里搜索ZXPAutoLayout <font color=brown>(不知道什么是cocoapods或者使用方法者请自行百度, Google, 网上一大堆资料). </font>搜索命令:  `pod search zxpautolayout` 然后在安装到你的cocoapods里.  <p></p><font color=red>注意:有些用Cocoapods搜索出来的版本不是最新或者无法搜索到的, 请升级一下cocoapods即可</font>
+### 第二种方式: 直接在CocoaPods里搜索ZXPAutoLayout <font color=brown>(不知道什么是cocoapods或者使用方法者请自行百度, Google, 网上一大堆资料). </font>搜索命令:  `pod search zxpautolayout` 然后在安装到你的cocoapods里.  <p></p><font color=red>注意:有些用CocoaPods搜索出来的版本不是最新或者无法搜索到的, 请升级一下cocoapods即可</font>
 
 #如何使用它?
 <font size=4>**在需要的地方导入`ZXPAutoLayout.h`头文件即可**</font>
