@@ -11,7 +11,7 @@
 >    会造成野指针错误
 
 
-#什么是ZXPAutoLayout ?
+# 什么是ZXPAutoLayout ?
 
 <font size=4>
 **iOS原生的自动布局(`NSLayoutConstraint`)非常繁琐, 影响开发进度和可读性也不利于维护, 正所谓工欲善其事必先利其器 , 有一个良好的自动布局框架, 则会让我们事半功倍. 而`ZXPAutoLayout`则是解决这一问题和诞生 . 采用新颖的链式语法, 扩展性,可读性,维护成本也较低.并致力打造最好用,最简洁,最方便,最轻巧的自动布局.** 
@@ -52,9 +52,9 @@
 <p></p>
 ### 第二种方式: 直接在Cocoapods里搜索ZXPAutoLayout <font color=brown>(不知道什么是cocoapods或者使用方法者请自行百度, Google, 网上一大堆资料). </font>搜索命令:  `pod search zxpautolayout` 然后在安装到你的cocoapods里.  <p></p><font color=red>注意:有些用Cocoapods搜索出来的版本不是最新或者无法搜索到的, 请升级一下cocoapods即可</font>
 
-#如何使用它?
+# 如何使用它?
 <font size=4>**在需要的地方导入`ZXPAutoLayout.h`头文件即可**</font>
-##**`设置一个红色的view,与self.view保持一致, 并适配各个iPhone机型和横竖屏`**
+## **`设置一个红色的view,与self.view保持一致, 并适配各个iPhone机型和横竖屏`**
 ```objective-c
 	//设置一个背景为半透明红色的view
     UIView *bgView = [UIView new];
@@ -71,7 +71,7 @@
     }];
 ```
 
-##**`设置一个蓝色view , 设置在superview里的距离和设置自身的宽高.`**
+## **`设置一个蓝色view , 设置在superview里的距离和设置自身的宽高.`**
 ```objective-c
 	UIView *blueView = [UIView new];
     [bgView addSubview:blueView];
@@ -88,7 +88,7 @@
     }];
 ```
 
-##**`设置一个灰色view , 设置参照于其他view的距离和等宽等距离属性`**
+## **`设置一个灰色view , 设置参照于其他view的距离和等宽等距离属性`**
 ```objective-c
 	UIView *grayView = [UIView new];
     [bgView addSubview:grayView];
@@ -118,7 +118,7 @@
     }];
 ```
 
-##**`UILabel的文字自适应,只需要设置autoHeight属性即可`**
+## **`UILabel的文字自适应,只需要设置autoHeight属性即可`**
 ```objective-c
 	UILabel *label = [UILabel new];
     [self.view addSubview:label];
@@ -137,7 +137,7 @@
     }];
 ```
 
-##**`等宽并水平对齐第一种方式`**
+## **`等宽并水平对齐第一种方式`**
 ```objective-c
 		UIView *view1 = [UIView new];
         [self.view addSubview:view1];
@@ -173,7 +173,7 @@
         }];
 ```
 
-##**`等宽并水平对齐第二种方式 -- ZXPStackView的使用`**
+## **`等宽并水平对齐第二种方式 -- ZXPStackView的使用`**
 ```objective-c
 		ZXPStackView *stackView = [ZXPStackView new];
         [self.view addSubview:stackView];
@@ -207,7 +207,7 @@
         [stackView layoutWithType:ZXPStackViewTypeHorizontal];
 ```
 
-##**`ZXPStackView之等高垂直对齐`**
+## **`ZXPStackView之等高垂直对齐`**
 <font size=4>**只需要调用ZXPStackView的layoutWithType: 方法,并传入ZXPStackViewTypeVertical即可实现,如以上代码一样.只是布局所传入的类型参数不同而已, 内部会根据所传入的布局类型,自动进行约束的添加.**</font>
 ```objective-c
 		ZXPStackView *stackView = [ZXPStackView new];
@@ -244,7 +244,7 @@
 
 ## <font color=red>**注意: ZXPStackView的subview不需要添加约束, 在调用`layoutWithType: `方法的时候,内部会自动进行约束的添加 **</font>
 
-#**总结**
-###**本篇文章讲解了`ZXPAutoLayout`的基本使用和常用api的方法. 比如如何设置一个view的约束, 或者等宽, 等高, 位置相对于某个view的某一边,  宽高又相对于某一个view或者等比例的常用apis. `如有问题或者写的不好地方留言即可~!`**
+# **总结**
+### **本篇文章讲解了`ZXPAutoLayout`的基本使用和常用api的方法. 比如如何设置一个view的约束, 或者等宽, 等高, 位置相对于某个view的某一边,  宽高又相对于某一个view或者等比例的常用apis. `如有问题或者写的不好地方留言即可~!`**
 
 #### 有任何问题欢迎issue我,你们的issue才是我的动力~! thanks
